@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المركز المالي - أكاديمية جيل المستقبل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f0f2f5; }
+        .dashboard-item { background: #fff; padding: 15px; border-radius: .75rem; text-align: center; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .dashboard-item .value { font-size: 1.6rem; font-weight: 700; }
+        .dashboard-item .label { font-size: 0.9rem; color: #64748b; font-weight: 600; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: right; vertical-align: middle; }
+        thead { background-color: #212529; color: #f8f9fa; }
+        tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        #receipt-to-print { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-to-print, #receipt-to-print * { visibility: visible; }
+            #receipt-to-print { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; font-family: 'Tajawal', sans-serif; direction: rtl; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="relative min-h-screen md:flex">
+    <aside class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 right-0 transform md:relative md:translate-x-0 z-30">
+        <div class="p-3 text-center border-b border-gray-700">
+            <h2 class="text-2xl font-bold">جيل المستقبل</h2>
+        </div>
+        <nav class="flex-1 p-2 space-y-2">
+            <a href="dashboard.html#analytics" class="flex items-center px-4 py-3 rounded-md hover:bg-blue-700"><i class="fas fa-chart-line fa-fw mr-3"></i> لوحة التحكم</a>
+            <a href="finance.html" class="bg-blue-600 text-white flex items-center px-4 py-3 rounded-md"><i class="fas fa-coins fa-fw mr-3"></i> المركز المالي</a>
+            </nav>
+        <div class="p-4 border-t border-gray-700">
+            <a href="index.html" class="w-full text-center bg-gray-600 py-2 rounded-md hover:bg-gray-700 transition-colors block"><i class="fas fa-home mr-2"></i> العودة للموقع</a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+        <h1 class="text-3xl font-bold mb-6">المركز المالي</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="dashboard-item"><div id="summary-income" class="value text-green-600">0</div><div class="label">إجمالي الدخل</div></div>
+            <div class="dashboard-item"><div id="summary-expenses" class="value text-red-600">0</div><div class="label">إجمالي المصاريف</div></div>
+            <div class="dashboard-item"><div id="summary-profit" class="value text-blue-600">0</div><div class="label">صافي الربح</div></div>
+            <div class="dashboard-item"><div id="summary-debt" class="value text-yellow-600">0</div><div class="label">إجمالي الديون (موظفين)</div></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-bold mb-4 border-b pb-2">إنشاء وصل دفع للطالب</h2>
+                <form id="receipt-form" class="space-y-4">
+                    <input type="text" id="student-name" placeholder="اسم الطالب" required class="w-full p-2 border rounded">
+                    <input type="text" id="parent-name" placeholder="اسم ولي الأمر (اختياري)" class="w-full p-2 border rounded">
+                    <input type="number" id="payment-amount" placeholder="المبلغ المدفوع (دج)" required class="w-full p-2 border rounded">
+                    <input type="text" id="payment-for" placeholder="مقابل (مثال: رسوم شهر أكتوبر)" required class="w-full p-2 border rounded">
+                    <select id="payment-method" class="w-full p-2 border rounded">
+                        <option value="نقداً">نقداً</option>
+                        <option value="تحويل بنكي">تحويل بنكي</option>
+                        <option value="CCP">CCP</option>
+                    </select>
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg text-lg">إنشاء وطباعة الوصل</button>
+                </form>
+            </div>
+            
+            <div class="space-y-8">
+                 <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-xl font-bold mb-4 border-b pb-2">تسجيل مصروف عام</h2>
+                    <form id="expense-form" class="space-y-4">
+                         <input type="text" id="expense-desc" placeholder="بيان المصروف (فاتورة كهرباء)" required class="w-full p-2 border rounded">
+                         <input type="number" id="expense-amount" placeholder="المبلغ (دج)" required class="w-full p-2 border rounded">
+                         <button type="submit" class="w-full bg-red-500 text-white font-bold py-3 rounded-lg">تسجيل المصروف</button>
+                    </form>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                     <h2 class="text-xl font-bold mb-4 border-b pb-2">إدارة ديون الموظفين</h2>
+                     <div id="debt-list" class="mb-4"></div>
+                     <button id="add-debt-btn" class="w-full bg-yellow-500 text-white font-bold py-2 rounded-lg">إضافة/تعديل دين</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-bold mb-4">سجل المعاملات المالية</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th></tr></thead>
+                    <tbody id="transactions-log"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="receipt-to-print"></div>
+<div id="modal-container"></div>
+
+<script type="module">
+    import { app } from './firebase-config.js';
+    import { getFirestore, collection, addDoc, doc, onSnapshot, query, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    const db = getFirestore(app);
+
+    // --- Main Logic ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadFinancialSummary();
+        loadTransactionsLog();
+        setupForms();
+    });
+
+    function loadFinancialSummary() {
+        onSnapshot(collection(db, "transactions"), (snapshot) => {
+            let income = 0, expenses = 0;
+            snapshot.forEach(doc => {
+                const t = doc.data();
+                if (t.type === 'income' || t.type === 'student_payment') income += t.amount;
+                else if (t.type === 'expense') expenses += t.amount;
+            });
+            onSnapshot(collection(db, "schedules"), (scheduleSnapshot) => {
+                let sessionIncome = 0;
+                scheduleSnapshot.forEach(doc => { sessionIncome += doc.data().sessionRevenue || 0; });
+                
+                document.getElementById('summary-income').textContent = `${(income + sessionIncome).toLocaleString()} دج`;
+                document.getElementById('summary-expenses').textContent = `${expenses.toLocaleString()} دج`;
+                document.getElementById('summary-profit').textContent = `${(income + sessionIncome - expenses).toLocaleString()} دج`;
+            });
+        });
+        // You can add debt summary logic here as well
+    }
+
+    function loadTransactionsLog() {
+        const logBody = document.getElementById('transactions-log');
+        const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            logBody.innerHTML = snapshot.empty ? '<tr><td colspan="4" class="text-center p-4">لا توجد معاملات.</td></tr>' : '';
+            snapshot.forEach(doc => {
+                const t = doc.data();
+                const typeMap = { 'student_payment': 'قبض طالب', 'expense': 'مصروف', 'income': 'دخل آخر' };
+                const typeColor = t.type.includes('payment') || t.type.includes('income') ? 'text-green-600' : 'text-red-600';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${t.createdAt.toDate().toLocaleDateString('ar-EG')}</td>
+                    <td class="font-semibold ${typeColor}">${typeMap[t.type] || 'غير محدد'}</td>
+                    <td>${t.description}</td>
+                    <td class="font-bold">${t.amount.toLocaleString()} دج</td>
+                `;
+                logBody.appendChild(row);
+            });
+        });
+    }
+
+    function setupForms() {
+        // Receipt Form
+        document.getElementById('receipt-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const studentName = document.getElementById('student-name').value;
+            const amount = Number(document.getElementById('payment-amount').value);
+            const forReason = document.getElementById('payment-for').value;
+
+            // 1. Save transaction to database
+            await addDoc(collection(db, "transactions"), {
+                type: 'student_payment',
+                description: `وصل دفع للطالب: ${studentName} - مقابل: ${forReason}`,
+                amount: amount,
+                createdAt: serverTimestamp()
+            });
+
+            // 2. Print receipt
+            printReceipt({
+                studentName,
+                parentName: document.getElementById('parent-name').value,
+                amount,
+                forReason,
+                method: document.getElementById('payment-method').value,
+                date: new Date().toLocaleDateString('ar-EG'),
+                receiptId: `RCPT-${Date.now()}`
+            });
+            e.target.reset();
+        });
+
+        // Expense Form
+        document.getElementById('expense-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const description = document.getElementById('expense-desc').value;
+            const amount = Number(document.getElementById('expense-amount').value);
+            await addDoc(collection(db, "transactions"), {
+                type: 'expense',
+                description,
+                amount,
+                createdAt: serverTimestamp()
+            });
+            e.target.reset();
+            alert('تم تسجيل المصروف بنجاح');
+        });
+    }
+
+    function printReceipt(data) {
+        const printContainer = document.getElementById('receipt-to-print');
+        printContainer.innerHTML = `
+            <div style="border: 2px solid #333; padding: 25px; max-width: 800px; margin: auto; background: #fff;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px;">
+                    <div>
+                        <h1 style="font-size: 24px; margin: 0; color: #2563eb;">أكاديمية جيل المستقبل</h1>
+                        <p style="margin: 0;">بيئة تعليمية مبتكرة</p>
+                    </div>
+                    <h2 style="font-size: 28px; margin: 0;">وصل قبض</h2>
+                </div>
+                <div style="padding: 20px 0; font-size: 14px;">
+                    <p><strong>رقم الوصل:</strong> ${data.receiptId}</p>
+                    <p><strong>التاريخ:</strong> ${data.date}</p>
+                    <p><strong>استلمنا من السيد/السيدة:</strong> ${data.parentName || 'ولي أمر الطالب/ة'}</p>
+                    <p><strong>اسم الطالب/ة:</strong> ${data.studentName}</p>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead><tr style="background-color: #f0f2f5;">
+                        <th style="border: 1px solid #ccc; padding: 10px;">البيان</th>
+                        <th style="border: 1px solid #ccc; padding: 10px;">المبلغ</th>
+                    </tr></thead>
+                    <tbody><tr>
+                        <td style="border: 1px solid #ccc; padding: 10px;">${data.forReason}</td>
+                        <td style="border: 1px solid #ccc; padding: 10px; font-weight: bold;">${data.amount.toLocaleString()} دج</td>
+                    </tr></tbody>
+                </table>
+                 <div style="margin-top: 20px; text-align: left; font-size: 16px;">
+                     <p><strong>طريقة الدفع:</strong> ${data.method}</p>
+                    <p style="font-weight: bold; font-size: 18px;">الإجمالي: ${data.amount.toLocaleString()} دج</p>
+                </div>
+                <div style="margin-top: 50px; text-align: center; border-top: 1px dashed #999; padding-top: 15px;">
+                    <p><strong>ختم وتوقيع الإدارة</strong></p>
+                </div>
+            </div>
+        `;
+        window.print();
+    }
+
+</script>
+</body>
+</html>

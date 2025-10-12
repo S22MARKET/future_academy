@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - أكاديمية جيل المستقبل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f0f2f5; }
+        .hidden { display: none; }
+        .active-tab { background-color: #2563eb; color: white; }
+        .dashboard-panel { animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 40; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); animation: fadeIn 0.3s; }
+        .modal-content { background-color: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 700px; z-index: 50; max-height: 90vh; overflow-y: auto; }
+        .dashboard-item { background-color: #ffffff; padding: 1.5rem; border-radius: .75rem; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
+        .dashboard-item:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .dashboard-item .value { font-size: 2rem; font-weight: 800; }
+        .dashboard-item .label { font-size: 0.9rem; color: #64748b; font-weight: 600; margin-top: 0.5rem; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; text-align: right; vertical-align: middle; }
+        thead { background-color: #1e293b; color: #f8fafc; }
+        th { font-weight: 600; }
+        tbody tr:nth-child(even) { background-color: #f8fafc; }
+        tbody tr:hover { background-color: #f1f5f9; }
+        .action-btn { padding: 6px 10px; border-radius: 6px; color: white; border: none; cursor: pointer; font-size: 14px; margin: 0 3px; transition: opacity 0.2s; }
+        .action-btn:hover { opacity: 0.8; }
+        .edit-btn { background-color: #f59e0b; }
+        .delete-btn { background-color: #ef4444; }
+        .status-btn { background-color: #10b981; }
+    </style>
+</head>
+<body>
+
+<div id="dashboard-page">
+    <div class="relative min-h-screen md:flex">
+        <aside id="sidebar" class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 right-0 transform translate-x-full md:relative md:translate-x-0 transition duration-300 ease-in-out z-30 shadow-lg">
+            <div class="p-3 text-center border-b border-gray-700">
+                <h2 class="text-2xl font-bold">جيل المستقبل</h2>
+            </div>
+            <nav class="flex-1 p-2 space-y-2">
+                <a href="#analytics" class="dashboard-tab active-tab flex items-center px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"><i class="fas fa-chart-line fa-fw mr-3"></i> الملخص العام</a>
+                <a href="finance.html" class="flex items-center px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"><i class="fas fa-coins fa-fw mr-3"></i> المركز المالي</a>
+                <a href="#halls" class="dashboard-tab flex items-center px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"><i class="fas fa-school fa-fw mr-3"></i> إدارة القاعات</a>
+                <a href="#schedules" class="dashboard-tab flex items-center px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"><i class="fas fa-calendar-alt fa-fw mr-3"></i> إدارة الجداول</a>
+                <a href="#news" class="dashboard-tab flex items-center px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"><i class="fas fa-newspaper fa-fw mr-3"></i> إدارة الأخبار</a>
+                <a href="#employees" class="dashboard-tab flex items-center px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"><i class="fas fa-users-cog fa-fw mr-3"></i> إدارة الموظفين</a>
+                <a href="#inquiries" class="dashboard-tab flex items-center px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"><i class="fas fa-envelope-open-text fa-fw mr-3"></i> الاستفسارات الواردة</a>
+                <a href="#settings" class="dashboard-tab flex items-center px-4 py-3 rounded-md hover:bg-blue-700 transition-colors"><i class="fas fa-cogs fa-fw mr-3"></i> إعدادات الأكاديمية</a>
+            </nav>
+             <div class="p-4 border-t border-gray-700">
+                <a href="index.html" class="w-full text-center bg-gray-600 py-2 rounded-md hover:bg-gray-700 transition-colors block"><i class="fas fa-home mr-2"></i> العودة للموقع</a>
+            </div>
+        </aside>
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
+
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <header class="flex justify-between items-center mb-6">
+                <button id="mobile-menu-btn" class="md:hidden p-2 bg-white rounded-md shadow"><i class="fas fa-bars text-gray-600"></i></button>
+                <h1 id="panel-title" class="text-3xl font-bold text-gray-800">الملخص العام</h1>
+                <div id="main-action-button-container"></div>
+            </header>
+            
+            <div id="analytics-panel" class="dashboard-panel"></div>
+            <div id="halls-panel" class="dashboard-panel hidden"></div>
+            <div id="schedules-panel" class="dashboard-panel hidden"></div>
+            <div id="news-panel" class="dashboard-panel hidden"></div>
+            <div id="employees-panel" class="dashboard-panel hidden"></div>
+            <div id="inquiries-panel" class="dashboard-panel hidden"></div>
+            <div id="settings-panel" class="dashboard-panel hidden"></div>
+        </main>
+    </div>
+</div>
+
+<div id="modal-container"></div>
+
+<script type="module">
+    // Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, where, addDoc, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+    // Firebase configuration from user
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-VyUd5FUMb0KCUROhQRqoyOL1V7Noguk",
+      authDomain: "akadimiat-jyl-almustaqbal.firebaseapp.com",
+      projectId: "akadimiat-jyl-almustaqbal",
+      storageBucket: "akadimiat-jyl-almustaqbal.appspot.com",
+      messagingSenderId: "495523964077",
+      appId: "1:495523964077:web:c73b443dd98733ab0a9224",
+      measurementId: "G-8HY9WHV1Z1"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // --- GENERIC HELPER FUNCTIONS ---
+    const modalContainer = document.getElementById('modal-container');
+    
+    const showModal = (content) => {
+        modalContainer.innerHTML = `<div class="modal-backdrop"><div class="modal-content">${content}</div></div>`;
+        const backdrop = modalContainer.querySelector('.modal-backdrop');
+        backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+    };
+    const closeModal = () => { modalContainer.innerHTML = ''; };
+    window.closeModal = closeModal;
+
+    const showAlert = (message, type = 'success') => {
+        const bgColor = type === 'success' ? 'bg-green-100 border-green-500 text-green-700' : 'bg-red-100 border-red-500 text-red-700';
+        const modalContent = `
+            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full text-center p-6">
+                <div class="border-l-4 ${bgColor} p-4" role="alert">
+                    <p class="font-bold">${type === 'success' ? 'نجاح' : 'خطأ'}</p>
+                    <p>${message}</p>
+                </div>
+                <button onclick="closeModal()" class="mt-4 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">إغلاق</button>
+            </div>`;
+        showModal(modalContent);
+    };
+
+    const showConfirm = (message, onConfirm) => {
+        const modalContent = `
+            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full text-center p-6">
+                <h3 class="text-xl font-bold mb-4">تأكيد الإجراء</h3>
+                <p class="text-gray-600 mb-6">${message}</p>
+                <div class="flex justify-center gap-4">
+                    <button id="confirm-cancel-btn" class="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">إلغاء</button>
+                    <button id="confirm-ok-btn" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg">تأكيد الحذف</button>
+                </div>
+            </div>`;
+        showModal(modalContent);
+        document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+            onConfirm();
+            closeModal();
+        });
+        document.getElementById('confirm-cancel-btn').addEventListener('click', closeModal);
+    };
+
+    const showLoader = (form) => {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if(submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loader !w-6 !h-6 !border-4 mx-auto"></div>';
+        }
+    };
+
+    const hideLoader = (form, text) => {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if(submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = text;
+        }
+    };
+
+    // --- NAVIGATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('.dashboard-tab');
+        const panels = document.querySelectorAll('.dashboard-panel');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const panelTitle = document.getElementById('panel-title');
+        const mainActionButtonContainer = document.getElementById('main-action-button-container');
+
+        const closeSidebar = () => {
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+        };
+
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+        });
+        overlay.addEventListener('click', closeSidebar);
+
+        const activatePanel = (targetHash) => {
+             const tab = document.querySelector(`.dashboard-tab[href="${targetHash}"]`);
+             if (!tab || tab.href.includes('.html')) return;
+
+             const targetPanelId = targetHash.substring(1) + '-panel';
+             
+             tabs.forEach(t => t.classList.remove('active-tab'));
+             tab.classList.add('active-tab');
+
+             panels.forEach(panel => panel.classList.toggle('hidden', panel.id !== targetPanelId));
+             
+             history.pushState(null, '', targetHash);
+             panelTitle.textContent = tab.textContent.trim();
+             mainActionButtonContainer.innerHTML = ''; // Clear old buttons
+
+             if (window.innerWidth < 768) closeSidebar();
+
+             switch(targetPanelId) {
+                case 'analytics-panel': renderAnalyticsPanel(); break;
+                case 'halls-panel': renderHallsPanel(); break;
+                case 'schedules-panel': renderSchedulesPanel(); break;
+                case 'news-panel': renderNewsPanel(); break;
+                case 'employees-panel': renderEmployeesPanel(); break;
+                case 'inquiries-panel': renderInquiriesPanel(); break;
+                case 'settings-panel': renderSettingsPanel(); break;
+             }
+        }
+
+        tabs.forEach(tab => tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            activatePanel(tab.getAttribute('href'));
+        }));
+        
+        window.onpopstate = () => activatePanel(window.location.hash || '#analytics');
+        activatePanel(window.location.hash || '#analytics');
+    });
+    
+    function addMainActionButton(text, onClick) {
+        const btn = document.createElement('button');
+        btn.className = "bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors";
+        btn.innerHTML = `<i class="fas fa-plus mr-2"></i> ${text}`;
+        btn.onclick = onClick;
+        document.getElementById('main-action-button-container').appendChild(btn);
+    }
+
+    // --- PANEL RENDERERS ---
+
+    // 1. Analytics Panel
+    function renderAnalyticsPanel() {
+        const panel = document.getElementById('analytics-panel');
+        panel.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="dashboard-item"><div id="new-inquiries-count" class="value text-blue-600">0</div><div class="label">استفسار جديد</div></div>
+                <div class="dashboard-item"><div id="total-teachers-count" class="value text-purple-600">0</div><div class="label">أستاذ مسجل</div></div>
+                <div class="dashboard-item"><div id="total-income" class="value text-green-600">0 دج</div><div class="label">إجمالي الدخل</div></div>
+                <div class="dashboard-item"><div id="total-expenses" class="value text-red-600">0 دج</div><div class="label">إجمالي المصاريف</div></div>
+            </div>
+            <div class="mt-8 p-6 bg-white rounded-xl shadow-md text-center">
+                <h2 class="text-2xl font-bold mb-4">إدارة الشؤون المالية</h2>
+                <p class="text-gray-600 mb-6">لإدارة تفاصيل المداخيل، المصاريف، ديون الموظفين، وإنشاء وصولات الدفع، انتقل إلى المركز المالي.</p>
+                <a href="finance.html" class="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-blue-700 transition-transform hover:scale-105">
+                    <i class="fas fa-arrow-left mr-2"></i> الذهاب إلى المركز المالي
+                </a>
+            </div>`;
+        onSnapshot(query(collection(db, "inquiries"), where("status", "==", "new")), s => { document.getElementById('new-inquiries-count').textContent = s.size; });
+        onSnapshot(query(collection(db, "employees"), where("role", "==", "أستاذ")), s => { document.getElementById('total-teachers-count').textContent = s.size; });
+        
+        // --- START: CORRECTED FINANCIAL CALCULATION ---
+        onSnapshot(collection(db, "transactions"), (snapshot) => {
+            let totalIncome = 0, totalExpenses = 0;
+            snapshot.forEach(doc => {
+                const trans = doc.data();
+                if (['income', 'student_payment'].includes(trans.type)) {
+                    totalIncome += trans.amount;
+                } else if (trans.type === 'expense') {
+                    totalExpenses += trans.amount;
+                }
+            });
+            
+            // Also get income from schedules
+            onSnapshot(collection(db, "schedules"), (scheduleSnapshot) => {
+                let sessionIncome = 0;
+                scheduleSnapshot.forEach(doc => {
+                    sessionIncome += doc.data().sessionRevenue || 0;
+                });
+                
+                // Update UI with combined income
+                document.getElementById('total-income').textContent = `${(totalIncome + sessionIncome).toLocaleString()} دج`;
+            });
+
+            document.getElementById('total-expenses').textContent = `${totalExpenses.toLocaleString()} دج`;
+        });
+        // --- END: CORRECTED FINANCIAL CALCULATION ---
+    }
+
+    // 2. Halls Panel
+    function renderHallsPanel() {
+        addMainActionButton('إضافة قاعة', () => showHallModal());
+        const panel = document.getElementById('halls-panel');
+        panel.innerHTML = `
+            <div class="bg-white p-4 rounded-xl shadow-md table-wrapper">
+                <table>
+                    <thead><tr><th>صورة</th><th>اسم القاعة</th><th>الوصف</th><th>إجراءات</th></tr></thead>
+                    <tbody id="halls-table-body"><tr><td colspan="4" class="text-center p-8"><div class="loader mx-auto"></div></td></tr></tbody>
+                </table>
+            </div>`;
+        const tableBody = document.getElementById('halls-table-body');
+        onSnapshot(query(collection(db, "halls"), orderBy("createdAt", "desc")), (snapshot) => {
+            if (snapshot.empty) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4">لم تتم إضافة أي قاعات بعد.</td></tr>`;
+                return;
+            }
+            tableBody.innerHTML = snapshot.docs.map(doc => {
+                const hall = doc.data();
+                return `
+                    <tr>
+                        <td><img src="${hall.imageUrl}" alt="${hall.name}" class="w-24 h-16 object-cover rounded-md"></td>
+                        <td class="font-semibold">${hall.name}</td>
+                        <td>${hall.description}</td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="editHall('${doc.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete-btn" onclick="deleteHall('${doc.id}', '${hall.imageUrl}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        });
+    }
+
+    // 3. Schedules Panel
+    function renderSchedulesPanel() {
+        addMainActionButton('إضافة حصة', () => showScheduleModal());
+        const panel = document.getElementById('schedules-panel');
+        panel.innerHTML = `
+            <div class="bg-white p-4 rounded-xl shadow-md table-wrapper">
+                <table>
+                    <thead><tr><th>اليوم</th><th>المادة</th><th>الطور</th><th>الأستاذ</th><th>التوقيت</th><th>إجراءات</th></tr></thead>
+                    <tbody id="schedules-table-body"><tr><td colspan="6" class="text-center p-8"><div class="loader mx-auto"></div></td></tr></tbody>
+                </table>
+            </div>`;
+        const tableBody = document.getElementById('schedules-table-body');
+        onSnapshot(query(collection(db, "schedules"), orderBy("dayIndex"), orderBy("time")), (snapshot) => {
+            if (snapshot.empty) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-4">لا توجد حصص مجدولة.</td></tr>`;
+                return;
+            }
+            tableBody.innerHTML = snapshot.docs.map(doc => {
+                const s = doc.data();
+                return `
+                    <tr>
+                        <td>${s.day}</td>
+                        <td>${s.subject}</td>
+                        <td>${s.level}</td>
+                        <td>${s.teacherName}</td>
+                        <td class="font-mono">${s.time}</td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="editSchedule('${doc.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete-btn" onclick="deleteData('schedules', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        });
+    }
+
+    // 4. News Panel
+    function renderNewsPanel() {
+        addMainActionButton('إضافة خبر', () => showNewsModal());
+        const panel = document.getElementById('news-panel');
+        panel.innerHTML = `
+            <div class="bg-white p-4 rounded-xl shadow-md table-wrapper">
+                <table>
+                    <thead><tr><th>صورة</th><th>العنوان</th><th>تاريخ النشر</th><th>إجراءات</th></tr></thead>
+                    <tbody id="news-table-body"><tr><td colspan="4" class="text-center p-8"><div class="loader mx-auto"></div></td></tr></tbody>
+                </table>
+            </div>`;
+        const tableBody = document.getElementById('news-table-body');
+        onSnapshot(query(collection(db, "news"), orderBy("createdAt", "desc")), (snapshot) => {
+            if (snapshot.empty) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4">لا توجد أخبار منشورة.</td></tr>`;
+                return;
+            }
+            tableBody.innerHTML = snapshot.docs.map(doc => {
+                const news = doc.data();
+                const date = news.createdAt?.toDate().toLocaleDateString('ar-EG') || 'غير محدد';
+                return `
+                    <tr>
+                        <td><img src="${news.imageUrl}" alt="${news.title}" class="w-24 h-16 object-cover rounded-md"></td>
+                        <td class="font-semibold">${news.title}</td>
+                        <td>${date}</td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="editNews('${doc.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete-btn" onclick="deleteNews('${doc.id}', '${news.imageUrl}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        });
+    }
+
+    // 5. Employees Panel
+    function renderEmployeesPanel() {
+        addMainActionButton('إضافة موظف', () => showEmployeeModal());
+        const panel = document.getElementById('employees-panel');
+        panel.innerHTML = `
+            <div class="bg-white p-4 rounded-xl shadow-md table-wrapper">
+                <table>
+                    <thead><tr><th>الاسم الكامل</th><th>الدور</th><th>الهاتف</th><th>المادة (للأستاذ)</th><th>إجراءات</th></tr></thead>
+                    <tbody id="employees-table-body"><tr><td colspan="5" class="text-center p-8"><div class="loader mx-auto"></div></td></tr></tbody>
+                </table>
+            </div>`;
+        const tableBody = document.getElementById('employees-table-body');
+        onSnapshot(query(collection(db, "employees"), orderBy("name")), (snapshot) => {
+             if (snapshot.empty) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4">لا يوجد موظفين مسجلين.</td></tr>`;
+                return;
+            }
+            tableBody.innerHTML = snapshot.docs.map(doc => {
+                const emp = doc.data();
+                return `
+                    <tr>
+                        <td class="font-semibold">${emp.name}</td>
+                        <td><span class="px-2 py-1 rounded-full text-xs font-semibold ${emp.role === 'أستاذ' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}">${emp.role}</span></td>
+                        <td>${emp.phone || '-'}</td>
+                        <td>${emp.subject || '-'}</td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="editEmployee('${doc.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete-btn" onclick="deleteData('employees', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        });
+    }
+    
+    // 6. Inquiries Panel
+    function renderInquiriesPanel() {
+        const panel = document.getElementById('inquiries-panel');
+        panel.innerHTML = `
+             <div class="bg-white p-4 rounded-xl shadow-md table-wrapper">
+                <table>
+                    <thead><tr><th>الحالة</th><th>الاسم</th><th>الهاتف</th><th>الرسالة</th><th>تاريخ الإرسال</th><th>إجراءات</th></tr></thead>
+                    <tbody id="inquiries-table-body"><tr><td colspan="6" class="text-center p-8"><div class="loader mx-auto"></div></td></tr></tbody>
+                </table>
+            </div>`;
+        const tableBody = document.getElementById('inquiries-table-body');
+        onSnapshot(query(collection(db, "inquiries"), orderBy("createdAt", "desc")), (snapshot) => {
+            if (snapshot.empty) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-4">لا توجد استفسارات واردة.</td></tr>`;
+                return;
+            }
+            tableBody.innerHTML = snapshot.docs.map(doc => {
+                const i = doc.data();
+                const isNew = i.status === 'new';
+                const date = i.createdAt?.toDate().toLocaleString('ar-EG') || '-';
+                return `
+                    <tr class="${isNew ? 'bg-blue-50 font-semibold' : ''}">
+                        <td><span class="px-2 py-1 rounded-full text-xs font-semibold ${isNew ? 'bg-blue-200 text-blue-800 animate-pulse' : 'bg-gray-200 text-gray-800'}">${isNew ? 'جديد' : 'مقروء'}</span></td>
+                        <td>${i.fullName}</td>
+                        <td>${i.phone}</td>
+                        <td class="whitespace-pre-wrap max-w-sm">${i.message}</td>
+                        <td>${date}</td>
+                        <td class="flex items-center">
+                            ${isNew ? `<button class="action-btn status-btn" onclick="updateInquiryStatus('${doc.id}', 'read')" title="وضع علامة كمقروء"><i class="fas fa-check"></i></button>` : ''}
+                            <button class="action-btn delete-btn" onclick="deleteData('inquiries', '${doc.id}')" title="حذف"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        });
+    }
+
+    // 7. Settings Panel
+    async function renderSettingsPanel() {
+        const panel = document.getElementById('settings-panel');
+        panel.innerHTML = `<div id="settings-form-container" class="bg-white p-6 rounded-xl shadow-md"><div class="loader mx-auto"></div></div>`;
+        
+        const settingsRef = doc(db, "settings", "general");
+        const docSnap = await getDoc(settingsRef);
+        const settings = docSnap.exists() ? docSnap.data() : {};
+        const stats = settings.stats || {};
+        const social = settings.socialLinks || {};
+
+        document.getElementById('settings-form-container').innerHTML = `
+            <form id="settings-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2 p-4 border rounded-lg bg-gray-50">
+                        <h3 class="text-lg font-bold mb-2">حالة الأكاديمية</h3>
+                        <div class="flex items-center gap-4 mb-2">
+                            <label>الحالة:</label>
+                            <input type="radio" id="status-open" name="isAcademyOpen" value="true" ${settings.isAcademyOpen !== false ? 'checked' : ''}> <label for="status-open">مفتوحة</label>
+                            <input type="radio" id="status-closed" name="isAcademyOpen" value="false" ${settings.isAcademyOpen === false ? 'checked' : ''}> <label for="status-closed">مغلقة</label>
+                        </div>
+                        <label for="closedMessage">رسالة الإغلاق (تظهر في شريط أعلى الموقع):</label>
+                        <input type="text" id="closedMessage" name="closedMessage" value="${settings.closedMessage || ''}" class="w-full p-2 border rounded mt-1">
+                    </div>
+                    <div class="p-4 border rounded-lg">
+                        <h3 class="text-lg font-bold mb-2">إحصائيات الصفحة الرئيسية</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label>عدد القاعات:</label><input type="number" name="stats.halls" value="${stats.halls || 0}" class="w-full p-2 border rounded"></div>
+                            <div><label>عدد الأساتذة:</label><input type="number" name="stats.teachers" value="${stats.teachers || 0}" class="w-full p-2 border rounded"></div>
+                            <div><label>عدد الطلاب:</label><input type="number" name="stats.students" value="${stats.students || 0}" class="w-full p-2 border rounded"></div>
+                            <div><label>عدد البرامج:</label><input type="number" name="stats.programs" value="${stats.programs || 0}" class="w-full p-2 border rounded"></div>
+                        </div>
+                    </div>
+                    <div class="p-4 border rounded-lg">
+                        <h3 class="text-lg font-bold mb-2">روابط التواصل</h3>
+                        <div class="space-y-2">
+                            <div><label>الهاتف 1:</label><input type="text" name="social.phone1" value="${social.phone1 || ''}" class="w-full p-2 border rounded"></div>
+                            <div><label>واتساب 1:</label><input type="text" name="social.whatsapp1" value="${social.whatsapp1 || ''}" class="w-full p-2 border rounded"></div>
+                            <div><label>فيسبوك:</label><input type="url" name="social.facebook1" value="${social.facebook1 || ''}" class="w-full p-2 border rounded"></div>
+                            <div><label>انستغرام:</label><input type="url" name="social.instagram1" value="${social.instagram1 || ''}" class="w-full p-2 border rounded"></div>
+                            <div><label>تيليجرام:</label><input type="url" name="social.telegram1" value="${social.telegram1 || ''}" class="w-full p-2 border rounded"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-left mt-6">
+                    <button type="submit" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors">حفظ الإعدادات</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('settings-form').addEventListener('submit', handleSettingsSave);
+    }
+    
+    // --- MODAL AND FORM HANDLERS ---
+    
+    // Hall Modal
+    window.showHallModal = async (docId = null) => {
+        let data = {};
+        if (docId) data = (await getDoc(doc(db, 'halls', docId))).data();
+        showModal(`
+            <form id="hall-form" class="space-y-4">
+                <h2 class="text-2xl font-bold">${docId ? 'تعديل' : 'إضافة'} قاعة</h2>
+                <input type="text" name="name" placeholder="اسم القاعة" required value="${data.name || ''}" class="w-full p-2 border rounded">
+                <textarea name="description" rows="3" placeholder="وصف قصير للقاعة" required class="w-full p-2 border rounded">${data.description || ''}</textarea>
+                <div>
+                    <label>صورة القاعة ${docId ? '(اختياري للتغيير)' : ''}</label>
+                    <input type="file" name="image" class="w-full p-2 border rounded bg-gray-50" ${docId ? '' : 'required'}>
+                    ${docId ? `<img src="${data.imageUrl}" class="w-32 mt-2 rounded">` : ''}
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeModal()" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">إلغاء</button>
+                    <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">حفظ</button>
+                </div>
+            </form>
+        `);
+        document.getElementById('hall-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const form = e.target;
+            showLoader(form);
+            const formData = { name: form.name.value, description: form.description.value };
+            if (form.image.files[0]) {
+                const file = form.image.files[0];
+                const storageRef = ref(storage, `halls/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                formData.imageUrl = await getDownloadURL(storageRef);
+            }
+            if (docId) {
+                await updateDoc(doc(db, 'halls', docId), formData);
+            } else {
+                formData.createdAt = serverTimestamp();
+                await addDoc(collection(db, 'halls'), formData);
+            }
+            closeModal();
+        });
+    };
+    window.editHall = (id) => showHallModal(id);
+
+    // Schedule Modal
+    window.showScheduleModal = async (docId = null) => {
+        let data = {};
+        if (docId) {
+            const docSnap = await getDoc(doc(db, 'schedules', docId));
+            if (docSnap.exists()) data = docSnap.data();
+        }
+        const teachersSnap = await getDocs(query(collection(db, "employees"), where("role", "==", "أستاذ")));
+        const teacherOptions = teachersSnap.docs.map(d => `<option value="${d.data().name}" ${d.data().name === data.teacherName ? 'selected' : ''}>${d.data().name}</option>`).join('');
+        const days = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+        const dayOptions = days.map((day, i) => `<option value="${i}" ${i === data.dayIndex ? 'selected' : ''}>${day}</option>`).join('');
+
+        showModal(`
+            <form id="schedule-form" class="space-y-4">
+                <h2 class="text-2xl font-bold">${docId ? 'تعديل' : 'إضافة'} حصة</h2>
+                <select name="dayIndex" required class="w-full p-2 border rounded">${dayOptions}</select>
+                <input type="text" name="subject" placeholder="المادة" required value="${data.subject || ''}" class="w-full p-2 border rounded">
+                <input type="text" name="level" placeholder="الطور/المستوى" required value="${data.level || ''}" class="w-full p-2 border rounded">
+                <select name="teacherName" required class="w-full p-2 border rounded"><option value="">اختر الأستاذ</option>${teacherOptions}</select>
+                <input type="text" name="time" placeholder="التوقيت (مثال: 08:00 - 10:00)" required value="${data.time || ''}" class="w-full p-2 border rounded">
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeModal()" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">إلغاء</button>
+                    <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">حفظ</button>
+                </div>
+            </form>
+        `);
+        document.getElementById('schedule-form').addEventListener('submit', async e => handleFormSubmit(e, 'schedules', docId, f => ({
+            dayIndex: Number(f.dayIndex.value),
+            day: f.dayIndex.options[f.dayIndex.selectedIndex].text,
+            subject: f.subject.value,
+            level: f.level.value,
+            teacherName: f.teacherName.value,
+            time: f.time.value
+        })));
+    };
+    window.editSchedule = (id) => showScheduleModal(id);
+
+    // News Modal
+    window.showNewsModal = async (docId = null) => {
+        let data = {};
+        if (docId) data = (await getDoc(doc(db, 'news', docId))).data();
+        showModal(`
+            <form id="news-form" class="space-y-4">
+                <h2 class="text-2xl font-bold">${docId ? 'تعديل' : 'إضافة'} خبر</h2>
+                <input type="text" name="title" placeholder="عنوان الخبر" required value="${data.title || ''}" class="w-full p-2 border rounded">
+                <textarea name="content" rows="5" placeholder="محتوى الخبر" required class="w-full p-2 border rounded">${data.content || ''}</textarea>
+                <div>
+                    <label>صورة الخبر ${docId ? '(اختياري للتغيير)' : ''}</label>
+                    <input type="file" name="image" class="w-full p-2 border rounded bg-gray-50" ${docId ? '' : 'required'}>
+                    ${docId ? `<img src="${data.imageUrl}" class="w-32 mt-2 rounded">` : ''}
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeModal()" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">إلغاء</button>
+                    <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">حفظ</button>
+                </div>
+            </form>
+        `);
+        document.getElementById('news-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const form = e.target;
+            showLoader(form);
+            const formData = { title: form.title.value, content: form.content.value };
+            if (form.image.files[0]) {
+                const file = form.image.files[0];
+                const storageRef = ref(storage, `news/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                formData.imageUrl = await getDownloadURL(storageRef);
+            }
+            if (docId) {
+                await updateDoc(doc(db, 'news', docId), formData);
+            } else {
+                formData.createdAt = serverTimestamp();
+                await addDoc(collection(db, 'news'), formData);
+            }
+            closeModal();
+        });
+    };
+    window.editNews = (id) => showNewsModal(id);
+    
+    // Employee Modal
+    window.showEmployeeModal = async (docId = null) => {
+        let data = {};
+        if (docId) data = (await getDoc(doc(db, 'employees', docId))).data();
+        showModal(`
+            <form id="employee-form" class="space-y-4">
+                <h2 class="text-2xl font-bold">${docId ? 'تعديل' : 'إضافة'} موظف</h2>
+                <input type="text" name="name" placeholder="الاسم الكامل" required value="${data.name || ''}" class="w-full p-2 border rounded">
+                <select name="role" required class="w-full p-2 border rounded">
+                    <option value="إدارة" ${data.role === 'إدارة' ? 'selected' : ''}>إدارة</option>
+                    <option value="أستاذ" ${data.role === 'أستاذ' ? 'selected' : ''}>أستاذ</option>
+                </select>
+                <input type="tel" name="phone" placeholder="رقم الهاتف" value="${data.phone || ''}" class="w-full p-2 border rounded">
+                <input type="text" name="subject" placeholder="المادة (في حال كان أستاذ)" value="${data.subject || ''}" class="w-full p-2 border rounded">
+                 <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeModal()" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">إلغاء</button>
+                    <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">حفظ</button>
+                </div>
+            </form>
+        `);
+         document.getElementById('employee-form').addEventListener('submit', async e => handleFormSubmit(e, 'employees', docId, f => ({
+            name: f.name.value, role: f.role.value, phone: f.phone.value, subject: f.subject.value
+        })));
+    };
+    window.editEmployee = (id) => showEmployeeModal(id);
+    
+    // --- DATA MANIPULATION ---
+    
+    async function handleFormSubmit(event, collectionName, docId, dataMapper) {
+        event.preventDefault();
+        const form = event.target;
+        showLoader(form);
+        const data = dataMapper(form);
+        try {
+            if (docId) {
+                await updateDoc(doc(db, collectionName, docId), data);
+            } else {
+                data.createdAt = serverTimestamp();
+                await addDoc(collection(db, collectionName), data);
+            }
+            closeModal();
+        } catch (error) {
+            console.error("Error saving data: ", error);
+            hideLoader(form, 'حفظ');
+        }
+    }
+
+    window.deleteData = async (collectionName, docId) => {
+        showConfirm('هل أنت متأكد من الحذف؟ لا يمكن التراجع عن هذا الإجراء.', async () => {
+            await deleteDoc(doc(db, collectionName, docId));
+        });
+    };
+
+    window.deleteHall = async (docId, imageUrl) => {
+        showConfirm('هل أنت متأكد من حذف هذه القاعة؟ سيتم حذف الصورة المرتبطة بها أيضاً.', async () => {
+            await deleteDoc(doc(db, 'halls', docId));
+            if (imageUrl) {
+                try { await deleteObject(ref(storage, imageUrl)); } catch (e) { console.error("Image delete error:", e); }
+            }
+        });
+    };
+    
+    window.deleteNews = async (docId, imageUrl) => {
+        showConfirm('هل أنت متأكد من حذف هذا الخبر؟ سيتم حذف الصورة المرتبطة به أيضاً.', async () => {
+            await deleteDoc(doc(db, 'news', docId));
+            if (imageUrl) {
+                try { await deleteObject(ref(storage, imageUrl)); } catch (e) { console.error("Image delete error:", e); }
+            }
+        });
+    };
+    
+    window.updateInquiryStatus = async (docId, status) => {
+        await updateDoc(doc(db, "inquiries", docId), { status });
+    };
+
+    async function handleSettingsSave(e) {
+        e.preventDefault();
+        const form = e.target;
+        showLoader(form);
+        const data = {
+            isAcademyOpen: form.isAcademyOpen.value === 'true',
+            closedMessage: form.closedMessage.value,
+            stats: {
+                halls: Number(form['stats.halls'].value),
+                teachers: Number(form['stats.teachers'].value),
+                students: Number(form['stats.students'].value),
+                programs: Number(form['stats.programs'].value)
+            },
+            socialLinks: {
+                phone1: form['social.phone1'].value,
+                whatsapp1: form['social.whatsapp1'].value,
+                facebook1: form['social.facebook1'].value,
+                instagram1: form['social.instagram1'].value,
+                telegram1: form['social.telegram1'].value
+            }
+        };
+
+        try {
+            await setDoc(doc(db, "settings", "general"), data);
+            showAlert("تم حفظ الإعدادات بنجاح!", "success");
+        } catch (error) {
+            console.error("Error saving settings: ", error);
+            showAlert("حدث خطأ أثناء حفظ الإعدادات.", "error");
+        } finally {
+            hideLoader(form, 'حفظ الإعدادات');
+        }
+    }
+</script>
+</body>
+</html>
