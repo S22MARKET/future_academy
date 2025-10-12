@@ -7,81 +7,188 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-     <style>
+    <style>
         :root {
-            --primary-color: #3b82f6; /* Blue-500 */
-            --primary-dark: #2563eb; /* Blue-600 */
-            --bg-body: #f8fafc;
-            --bg-card: #ffffff;
+            --primary-color: #3b82f6; 
+            --bg-body: #f8fafc; 
             --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --active-bg: #eff6ff; /* Blue-50 */
+            --active-bg: #eff6ff;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
         }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-body); color: var(--text-primary); padding-top: 72px; }
+        body { 
+            font-family: 'Tajawal', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-primary); 
+        }
+        .active-link { 
+            background-color: var(--active-bg); 
+            color: var(--primary-color); 
+            font-weight: 700; 
+            border-right: 4px solid var(--primary-color); 
+        }
+        .sidebar-link:hover { 
+            background-color: var(--active-bg); 
+            color: var(--primary-color); 
+            transform: translateX(-4px); 
+        }
         
-        .header { background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); position: fixed; top: 0; right: 0; left: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .icon-btn { font-size: 2.2rem; color: var(--text-secondary); cursor: pointer; height: 4.5rem; width: 4.5rem; line-height: 4.5rem; text-align: center; border-radius: 50%; transition: all .2s; }
-        .icon-btn:hover { background-color: var(--active-bg); color: var(--primary-color); }
+        /* New Schedule Styles */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+        }
+        .schedule-header {
+            display: none; /* Hidden on mobile by default */
+        }
+        .schedule-card {
+            grid-column: span 6 / span 6; /* Full width on mobile */
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .schedule-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #4b5563; /* text-gray-600 */
+        }
+        .schedule-item i {
+            color: var(--primary-color);
+            width: 20px;
+            text-align: center;
+        }
+        .schedule-item.full-span {
+            grid-column: span 2 / span 2;
+        }
+        .schedule-day {
+            grid-column: span 2 / span 2;
+            font-size: 1.25rem;
+            font-weight: 700;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0.5rem;
+        }
+        .schedule-status {
+            grid-column: span 2 / span 2;
+            text-align: center;
+            font-weight: 600;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
 
-        .side-bar { position: fixed; top: 0; right: -100%; width: 30rem; max-width: 90%; height: 100vh; background-color: var(--bg-card); border-left: 1px solid var(--border-color); z-index: 1200; transition: right 0.3s ease-in-out; display: flex; flex-direction: column; }
-        .side-bar.active { right: 0; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
-        .side-bar .navbar a { display: flex; align-items: center; gap: 2rem; padding: 1.5rem 2rem; font-size: 1.7rem; color: var(--text-secondary); transition: all .2s; font-weight: 500; }
-        .side-bar .navbar a:hover { background-color: var(--active-bg); color: var(--primary-color); padding-right: 2.5rem; }
-        .side-bar .navbar a.active-link { background-color: var(--active-bg); color: var(--primary-color); font-weight: 700; border-right: 4px solid var(--primary-color); }
-        .side-bar .navbar a i { font-size: 2rem; width: 2.5rem; text-align: center; }
-        
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1100; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
-        .overlay.active { opacity: 1; visibility: visible; }
-        
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: right; vertical-align: middle; }
-        thead { background-color: #1e293b; color: #f8fafc; }
-     </style>
+        /* Desktop view */
+        @media (min-width: 1024px) {
+            .schedule-header {
+                display: contents; /* Makes children act as grid items */
+            }
+            .schedule-header div {
+                background-color: #1e293b;
+                color: #f8fafc;
+                padding: 0.75rem 1rem;
+                font-weight: 700;
+                border-radius: 0.5rem;
+            }
+            .schedule-card {
+                grid-column: span 6 / span 6;
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                padding: 1rem;
+                align-items: center;
+                text-align: right;
+            }
+            .schedule-item {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            .schedule-item i {
+                display: none; /* Hide icons on desktop view */
+            }
+            .schedule-day, .schedule-status, .schedule-item.full-span {
+                grid-column: auto;
+            }
+             .schedule-day {
+                font-size: 1rem;
+                border: none;
+                margin: 0;
+                padding: 0.5rem;
+             }
+             .schedule-status {
+                margin: 0;
+             }
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-50">
+    <div class="flex">
+        <aside id="sidebar" class="fixed top-0 right-0 h-full bg-white shadow-lg w-64 transform transition-transform translate-x-full lg:translate-x-0 lg:static z-50">
+            <div class="p-5 border-b text-center">
+                <a href="index.html" class="text-2xl font-extrabold text-gray-800">جيل <span class="text-blue-600">المستقبل</span></a>
+            </div>
+            <nav class="flex flex-col p-4 space-y-2">
+                <a href="index.html" class="flex items-center gap-4 p-3 rounded-lg transition-all sidebar-link">
+                    <i class="fas fa-home fa-fw text-xl w-6 text-center"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="programs.html" class="flex items-center gap-4 p-3 rounded-lg transition-all sidebar-link">
+                    <i class="fas fa-book-open fa-fw text-xl w-6 text-center"></i>
+                    <span>البرامج الدراسية</span>
+                </a>
+                <a href="schedule.html" class="flex items-center gap-4 p-3 rounded-lg transition-all sidebar-link active-link">
+                    <i class="fas fa-calendar-alt fa-fw text-xl w-6 text-center"></i>
+                    <span>الجدول الزمني</span>
+                </a>
 
-    <div class="overlay"></div>
+                <a href="salles.html" class="text-slate-700 hover:text-sky-500 transition font-semibold">القاعات</a>
+                <a href="news.html" class="flex items-center gap-4 p-3 rounded-lg transition-all sidebar-link">
+                    <i class="fas fa-newspaper fa-fw text-xl w-6 text-center"></i>
+                    <span>آخر الأخبار</span>
+                </a>
+                <a href="contact.html" class="flex items-center gap-4 p-3 rounded-lg transition-all sidebar-link">
+                    <i class="fas fa-envelope fa-fw text-xl w-6 text-center"></i>
+                    <span>تواصل معنا</span>
+                </a>
+                <a href="dashboard.html" class="flex items-center gap-4 p-3 rounded-lg transition-all sidebar-link mt-8 border-t pt-4">
+                    <i class="fas fa-user-shield fa-fw text-xl w-6 text-center"></i>
+                    <span>دخول الإدارة</span>
+                </a>
+            </nav>
+        </aside>
 
-    <header class="header">
-        <div class="container mx-auto px-4 py-2 flex justify-between items-center">
-             <a href="index.html" class="text-2xl font-extrabold text-gray-800">جيل <span class="text-blue-600">المستقبل</span></a>
-             <nav class="hidden md:flex items-center space-x-8">
-                <a href="index.html" class="font-semibold text-gray-700 hover:text-blue-600">الرئيسية</a>
-                <a href="programs.html" class="font-semibold text-gray-700 hover:text-blue-600">البرامج</a>
-                <a href="schedule.html" class="font-semibold text-blue-600 border-b-2 border-blue-600 pb-1">الجدول</a>
-                <a href="news.html" class="font-semibold text-gray-700 hover:text-blue-600">الأخبار</a>
-                <a href="contact.html" class="font-semibold text-gray-700 hover:text-blue-600">التواصل</a>
-             </nav>
-             <div id="menu-btn" class="fas fa-bars icon-btn md:hidden"></div>
-        </div>
-    </header>
+        <div class="flex-1 min-w-0">
+            <header class="lg:hidden bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-40">
+                <a href="index.html" class="text-xl font-extrabold text-gray-800">جيل <span class="text-blue-600">المستقبل</span></a>
+                <button id="menu-btn" class="text-2xl text-gray-600">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </header>
 
-    <aside class="side-bar">
-        <div class="p-4 flex justify-end">
-            <div id="close-btn" class="fas fa-times icon-btn"></div>
+            <main class="container mx-auto px-4 py-16">
+                <h1 class="text-4xl font-bold text-center mb-12">الجدول الزمني للحصص</h1>
+                
+                <div id="schedule-container" class="space-y-8">
+                    <div id="loading-spinner" class="text-center p-8">
+                        <i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i>
+                        <p class="mt-4 text-lg font-semibold">جاري تحميل الجدول...</p>
+                    </div>
+                </div>
+
+            </main>
         </div>
-        <nav class="navbar">
-            <a href="index.html"><i class="fas fa-home fa-fw"></i><span>الرئيسية</span></a>
-            <a href="programs.html"><i class="fas fa-book-open fa-fw"></i><span>البرامج الدراسية</span></a>
-            <a href="schedule.html" class="active-link"><i class="fas fa-calendar-alt fa-fw"></i><span>الجدول الزمني</span></a>
-            <a href="news.html"><i class="fas fa-newspaper fa-fw"></i><span>آخر الأخبار</span></a>
-            <a href="contact.html"><i class="fas fa-envelope fa-fw"></i><span>تواصل معنا</span></a>
-            <a href="dashboard.html" class="mt-8 border-t pt-4"><i class="fas fa-user-shield fa-fw"></i><span>دخول الإدارة</span></a>
-        </nav>
-    </aside>
-    <main class="container mx-auto px-4 py-16">
-        <h1 class="text-4xl font-bold text-center mb-12">الجدول الزمني للحصص</h1>
-        <div class="table-wrapper bg-white rounded-lg shadow-lg p-4">
-             <table id="schedule-table">
-                <thead><tr><th>اليوم</th><th>المادة</th><th>الطور</th><th>الأستاذ</th><th>التوقيت</th><th>الحالة</th></tr></thead>
-                <tbody id="schedule-body">
-                    <tr><td colspan="6" class="text-center p-8">جاري تحميل الجدول...</td></tr>
-                </tbody>
-             </table>
-        </div>
-    </main>
+        <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+    </div>
     
      <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -99,93 +206,152 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- UNIFIED SCRIPT FOR SIDEBAR & DATA LOADING ---
         document.addEventListener('DOMContentLoaded', () => {
-            const sideBar = document.querySelector('.side-bar');
-            const overlay = document.querySelector('.overlay');
-            const menuBtn = document.querySelector('#menu-btn');
-            const closeBtn = document.querySelector('#close-btn');
-            
-            const closeAllPopups = () => {
-                sideBar.classList.remove('active');
-                overlay.classList.remove('active');
-                document.body.style.overflow = 'auto';
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const menuBtn = document.getElementById('menu-btn');
+
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('translate-x-full');
+                overlay.classList.toggle('hidden');
             };
 
-            if (menuBtn) {
-                menuBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    sideBar.classList.add('active');
-                    overlay.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                });
-            }
-
-            if (closeBtn) closeBtn.addEventListener('click', closeAllPopups);
-            if (overlay) overlay.addEventListener('click', closeAllPopups);
-            document.addEventListener('keydown', (e) => e.key === 'Escape' && closeAllPopups());
+            if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
+            if (overlay) overlay.addEventListener('click', toggleSidebar);
             
             loadSchedule();
             setInterval(loadSchedule, 60000); // Refresh every minute
         });
 
         async function loadSchedule() {
-            const tableBody = document.getElementById('schedule-body');
+            const container = document.getElementById('schedule-container');
             const q = query(collection(db, "schedules"), orderBy("dayIndex"), orderBy("time"));
             const snapshot = await getDocs(q);
 
             if(snapshot.empty) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-8">الجدول غير متوفر حاليًا.</td></tr>';
+                container.innerHTML = '<div class="text-center p-8 bg-white rounded-lg shadow-md"><p class="text-lg">الجدول غير متوفر حاليًا.</p></div>';
                 return;
             }
 
             const now = new Date();
-            const todayIndex = (now.getDay() + 1) % 7; // Adjust for Saturday=0 in data, Sunday=0 in JS
+            const todayIndex = now.getDay(); // Sunday = 0, Monday = 1, ...
             const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-            tableBody.innerHTML = snapshot.docs.map(doc => {
-                 const item = doc.data();
-                 if (!item.time || !item.time.includes(' - ')) return ''; 
+            const allSessions = snapshot.docs.map(doc => doc.data());
+            
+            const todaySessions = allSessions.filter(item => item.dayIndex === todayIndex);
+            const otherSessions = allSessions.filter(item => item.dayIndex !== todayIndex);
 
-                 const timeParts = item.time.split(' - ');
-                 const [startH, startM] = timeParts[0].split(':').map(Number);
-                 const [endH, endM] = timeParts[1].split(':').map(Number);
-                 const startTimeMinutes = startH * 60 + startM;
-                 const endTimeMinutes = endH * 60 + endM;
+            // Sort otherSessions to start from tomorrow
+            const sortedOtherSessions = otherSessions.sort((a, b) => {
+                const dayA = (a.dayIndex - todayIndex + 7) % 7;
+                const dayB = (b.dayIndex - todayIndex + 7) % 7;
+                return dayA - dayB;
+            });
+            
+            let html = '';
 
-                 let status = 'قادمة';
-                 let rowClass = 'bg-white';
-                 let statusClass = 'text-gray-600';
+            // Render Today's Sessions
+            if (todaySessions.length > 0) {
+                html += `<div class="space-y-4">`;
+                html += `<h2 class="text-2xl font-bold text-blue-600 border-r-4 border-blue-600 pr-4">حصص اليوم</h2>`;
+                html += `<div class="schedule-grid">`;
+                html += getScheduleHeader();
+                todaySessions.forEach(item => {
+                    html += createSessionCard(item, nowMinutes, todayIndex);
+                });
+                html += `</div></div>`;
+            }
 
-                 // Mapping Saturday=0, Sunday=1, etc. from data
-                 const dayIndexFromData = item.dayIndex;
-
-                 if (dayIndexFromData < todayIndex) {
-                     status = 'منتهية';
-                     rowClass = 'bg-gray-200 text-gray-500 opacity-70';
-                     statusClass = 'text-gray-500';
-                 } else if (dayIndexFromData === todayIndex) {
-                     if (nowMinutes > endTimeMinutes) {
-                         status = 'منتهية';
-                         rowClass = 'bg-red-100 text-black';
-                         statusClass = 'font-bold text-red-700';
-                     } else if (nowMinutes >= startTimeMinutes) {
-                         status = 'جارية الآن';
-                         rowClass = 'bg-green-100 text-black';
-                         statusClass = 'font-bold text-green-700 animate-pulse';
-                     }
-                 }
-                 
-                 return `<tr class="${rowClass}">
-                            <td class="p-3 font-bold">${item.day}</td>
-                            <td class="p-3">${item.subject}</td>
-                            <td class="p-3">${item.level}</td>
-                            <td class="p-3">${item.teacherName}</td>
-                            <td class="p-3 font-mono text-center">${item.time}</td>
-                            <td class="p-3 font-semibold text-center ${statusClass}">${status}</td>
-                        </tr>`;
-            }).join('');
+            // Render Other Sessions
+            if (sortedOtherSessions.length > 0) {
+                html += `<div class="space-y-4">`;
+                html += `<h2 class="text-2xl font-bold text-gray-700 border-r-4 border-gray-700 pr-4 mt-10">الأيام القادمة</h2>`;
+                 html += `<div class="schedule-grid">`;
+                html += getScheduleHeader();
+                sortedOtherSessions.forEach(item => {
+                    html += createSessionCard(item, nowMinutes, todayIndex);
+                });
+                html += `</div></div>`;
+            }
+            
+            container.innerHTML = html;
         }
+        
+        function getScheduleHeader() {
+             return `
+                <div class="schedule-header">
+                    <div>اليوم</div>
+                    <div>المادة</div>
+                    <div>الطور</div>
+                    <div>الأستاذ</div>
+                    <div>التوقيت</div>
+                    <div>الحالة</div>
+                </div>
+            `;
+        }
+
+        function createSessionCard(item, nowMinutes, todayIndex) {
+             if (!item.time || !item.time.includes(' - ')) return ''; 
+
+             const [startH, startM] = item.time.split(' - ')[0].split(':').map(Number);
+             const [endH, endM] = item.time.split(' - ')[1].split(':').map(Number);
+             const startTimeMinutes = startH * 60 + startM;
+             const endTimeMinutes = endH * 60 + endM;
+             
+             let status = 'قادمة';
+             let statusStyle = 'bg-gray-100 text-gray-700';
+             let cardOpacity = '';
+
+             const dayIndexFromData = item.dayIndex;
+             
+             // Check against day index in your data (assuming Sunday=0, ... Saturday=6)
+             if (dayIndexFromData < todayIndex) {
+                 status = 'منتهية';
+                 statusStyle = 'bg-red-100 text-red-800';
+                 cardOpacity = 'opacity-60';
+             } else if (dayIndexFromData === todayIndex) {
+                 if (nowMinutes > endTimeMinutes) {
+                     status = 'منتهية';
+                     statusStyle = 'bg-red-200 text-red-800 font-bold';
+                 } else if (nowMinutes >= startTimeMinutes) {
+                     status = 'جارية الآن';
+                     statusStyle = 'bg-green-200 text-green-800 font-bold animate-pulse';
+                 } else {
+                     status = 'قادمة';
+                     statusStyle = 'bg-blue-100 text-blue-800';
+                 }
+             }
+
+             return `
+                <div class="schedule-card ${cardOpacity}">
+                    <div class="schedule-day schedule-item full-span lg:full-auto">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>${item.day}</span>
+                    </div>
+                    <div class="schedule-item">
+                        <i class="fas fa-book"></i>
+                        <span>${item.subject}</span>
+                    </div>
+                    <div class="schedule-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>${item.level}</span>
+                    </div>
+                    <div class="schedule-item">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span>${item.teacherName}</span>
+                    </div>
+                    <div class="schedule-item">
+                        <i class="fas fa-clock"></i>
+                        <span class="font-mono">${item.time}</span>
+                    </div>
+                    <div class="schedule-status ${statusStyle}">
+                       ${status}
+                    </div>
+                </div>
+             `;
+        }
+
     </script>
 </body>
 </html>

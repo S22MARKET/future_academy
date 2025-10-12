@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
     <style>
         body { font-family: 'Tajawal', sans-serif; background-color: #f0f2f5; }
         .dashboard-item { background: #fff; padding: 15px; border-radius: .75rem; text-align: center; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
@@ -17,12 +18,14 @@
         th, td { border: 1px solid #dee2e6; padding: 12px; text-align: right; vertical-align: middle; }
         thead { background-color: #212529; color: #f8f9fa; }
         tbody tr:nth-child(even) { background-color: #f8f9fa; }
-        #receipt-to-print { display: none; }
-        @media print {
-            body * { visibility: hidden; }
-            #receipt-to-print, #receipt-to-print * { visibility: visible; }
-            #receipt-to-print { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; font-family: 'Tajawal', sans-serif; direction: rtl; }
-        }
+        .btn-sm { padding: 4px 8px; font-size: 0.8rem; border-radius: 0.25rem; }
+        .btn-warning { background-color: #ffc107; color: #000; }
+        .btn-danger { background-color: #dc3545; color: #fff; }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-box { background: #fff; padding: 25px; border-radius: .75rem; width: 100%; max-width: 450px; transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.visible .modal-box { transform: scale(1); }
     </style>
 </head>
 <body>
@@ -35,7 +38,8 @@
         <nav class="flex-1 p-2 space-y-2">
             <a href="dashboard.html#analytics" class="flex items-center px-4 py-3 rounded-md hover:bg-blue-700"><i class="fas fa-chart-line fa-fw mr-3"></i> لوحة التحكم</a>
             <a href="finance.html" class="bg-blue-600 text-white flex items-center px-4 py-3 rounded-md"><i class="fas fa-coins fa-fw mr-3"></i> المركز المالي</a>
-            </nav>
+            <a href="employees.html" class="flex items-center px-4 py-3 rounded-md hover:bg-blue-700"><i class="fas fa-users fa-fw mr-3"></i> شؤون الموظفين</a>
+        </nav>
         <div class="p-4 border-t border-gray-700">
             <a href="index.html" class="w-full text-center bg-gray-600 py-2 rounded-md hover:bg-gray-700 transition-colors block"><i class="fas fa-home mr-2"></i> العودة للموقع</a>
         </div>
@@ -44,11 +48,10 @@
     <main class="flex-1 p-4 md:p-8 overflow-y-auto">
         <h1 class="text-3xl font-bold mb-6">المركز المالي</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <div class="dashboard-item"><div id="summary-income" class="value text-green-600">0</div><div class="label">إجمالي الدخل</div></div>
             <div class="dashboard-item"><div id="summary-expenses" class="value text-red-600">0</div><div class="label">إجمالي المصاريف</div></div>
             <div class="dashboard-item"><div id="summary-profit" class="value text-blue-600">0</div><div class="label">صافي الربح</div></div>
-            <div class="dashboard-item"><div id="summary-debt" class="value text-yellow-600">0</div><div class="label">إجمالي الديون (موظفين)</div></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -56,7 +59,6 @@
                 <h2 class="text-xl font-bold mb-4 border-b pb-2">إنشاء وصل دفع للطالب</h2>
                 <form id="receipt-form" class="space-y-4">
                     <input type="text" id="student-name" placeholder="اسم الطالب" required class="w-full p-2 border rounded">
-                    <input type="text" id="parent-name" placeholder="اسم ولي الأمر (اختياري)" class="w-full p-2 border rounded">
                     <input type="number" id="payment-amount" placeholder="المبلغ المدفوع (دج)" required class="w-full p-2 border rounded">
                     <input type="text" id="payment-for" placeholder="مقابل (مثال: رسوم شهر أكتوبر)" required class="w-full p-2 border rounded">
                     <select id="payment-method" class="w-full p-2 border rounded">
@@ -68,28 +70,49 @@
                 </form>
             </div>
             
-            <div class="space-y-8">
-                 <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-xl font-bold mb-4 border-b pb-2">تسجيل مصروف عام</h2>
-                    <form id="expense-form" class="space-y-4">
-                         <input type="text" id="expense-desc" placeholder="بيان المصروف (فاتورة كهرباء)" required class="w-full p-2 border rounded">
-                         <input type="number" id="expense-amount" placeholder="المبلغ (دج)" required class="w-full p-2 border rounded">
-                         <button type="submit" class="w-full bg-red-500 text-white font-bold py-3 rounded-lg">تسجيل المصروف</button>
-                    </form>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                     <h2 class="text-xl font-bold mb-4 border-b pb-2">إدارة ديون الموظفين</h2>
-                     <div id="debt-list" class="mb-4"></div>
-                     <button id="add-debt-btn" class="w-full bg-yellow-500 text-white font-bold py-2 rounded-lg">إضافة/تعديل دين</button>
-                </div>
+             <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-bold mb-4 border-b pb-2">تسجيل مصروف عام</h2>
+                <form id="expense-form" class="space-y-4">
+                     <input type="text" id="expense-desc" placeholder="بيان المصروف (فاتورة كهرباء)" required class="w-full p-2 border rounded">
+                     <input type="number" id="expense-amount" placeholder="المبلغ (دج)" required class="w-full p-2 border rounded">
+                     <select id="expense-category" class="w-full p-2 border rounded">
+                        <option value="فواتير وخدمات">فواتير وخدمات</option>
+                        <option value="صيانة وتشغيل">صيانة وتشغيل</option>
+                        <option value="مستلزمات مكتبية">مستلزمات مكتبية</option>
+                        <option value="رواتب وأجور">رواتب وأجور</option>
+                        <option value="مصاريف أخرى">مصاريف أخرى</option>
+                     </select>
+                     <button type="submit" class="w-full bg-red-500 text-white font-bold py-3 rounded-lg">تسجيل المصروف</button>
+                </form>
             </div>
+        </div>
+        
+        <div class="mt-8 bg-white p-6 rounded-xl shadow-md">
+             <h2 class="text-xl font-bold mb-4 border-b pb-2">حساب دخل حصص الأساتذة</h2>
+             <form id="session-income-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div class="md:col-span-1">
+                    <label for="teacher-select" class="block text-sm font-medium text-gray-700">اسم الأستاذ</label>
+                    <select id="teacher-select" required class="mt-1 w-full p-2 border rounded"></select>
+                </div>
+                <div class="md:col-span-1">
+                    <label for="student-count" class="block text-sm font-medium text-gray-700">عدد الطلاب</label>
+                    <input type="number" id="student-count" placeholder="0" required class="mt-1 w-full p-2 border rounded">
+                </div>
+                <div class="md:col-span-1">
+                    <label for="chair-price" class="block text-sm font-medium text-gray-700">سعر الكرسي (دج)</label>
+                    <input type="number" id="chair-price" value="100" required class="mt-1 w-full p-2 border rounded">
+                </div>
+                <div class="md:col-span-1">
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg">حساب وتسجيل الدخل</button>
+                </div>
+             </form>
         </div>
         
         <div class="mt-8 bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold mb-4">سجل المعاملات المالية</h2>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th></tr></thead>
+                    <thead><tr><th>التاريخ</th><th>النوع</th><th>البيان / الفئة</th><th>المبلغ</th><th>إجراءات</th></tr></thead>
                     <tbody id="transactions-log"></tbody>
                 </table>
             </div>
@@ -97,146 +120,309 @@
     </main>
 </div>
 
-<div id="receipt-to-print"></div>
-<div id="modal-container"></div>
+<div id="edit-expense-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="text-xl font-bold mb-4">تعديل المصروف</h3>
+        <form id="edit-expense-form" class="space-y-4">
+            <input type="hidden" id="edit-expense-id">
+            <input type="text" id="edit-expense-desc" placeholder="بيان المصروف" required class="w-full p-2 border rounded">
+            <input type="number" id="edit-expense-amount" placeholder="المبلغ" required class="w-full p-2 border rounded">
+            <select id="edit-expense-category" class="w-full p-2 border rounded">
+                <option value="فواتير وخدمات">فواتير وخدمات</option>
+                <option value="صيانة وتشغيل">صيانة وتشغيل</option>
+                <option value="مستلزمات مكتبية">مستلزمات مكتبية</option>
+                <option value="رواتب وأجور">رواتب وأجور</option>
+                <option value="مصاريف أخرى">مصاريف أخرى</option>
+            </select>
+            <div class="flex justify-end gap-3 mt-4">
+                <button type="button" class="cancel-btn bg-gray-500 text-white px-4 py-2 rounded">إلغاء</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">حفظ التعديلات</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="notification-modal" class="modal-overlay">
+    <div class="modal-box text-center">
+        <p id="notification-message" class="mb-4 text-lg"></p>
+        <button class="close-notification-btn bg-blue-600 text-white px-6 py-2 rounded">موافق</button>
+    </div>
+</div>
+
+<div id="confirmation-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="text-xl font-bold mb-4">تأكيد الحذف</h3>
+        <p class="mb-3">هل أنت متأكد من رغبتك في الحذف؟ هذه العملية لا يمكن التراجع عنها.</p>
+        <div class="space-y-3">
+             <label for="password-confirm" class="block text-sm font-medium text-gray-700">للتأكيد، يرجى إدخال كلمة المرور: S22MARKET</label>
+             <input type="password" id="password-confirm" placeholder="كلمة المرور" class="w-full p-2 border rounded">
+             <p id="password-error" class="text-red-500 text-sm hidden">كلمة المرور غير صحيحة.</p>
+        </div>
+        <div class="flex justify-end gap-3 mt-4">
+            <button type="button" class="cancel-confirm-btn bg-gray-500 text-white px-4 py-2 rounded">إلغاء</button>
+            <button type="button" id="confirm-delete-btn" class="bg-red-600 text-white px-4 py-2 rounded">تأكيد الحذف</button>
+        </div>
+    </div>
+</div>
+
 
 <script type="module">
-    import { app } from './firebase-config.js';
-    import { getFirestore, collection, addDoc, doc, onSnapshot, query, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    const db = getFirestore(app);
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, orderBy, doc, updateDoc, deleteDoc, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    // --- Main Logic ---
-    document.addEventListener('DOMContentLoaded', () => {
-        loadFinancialSummary();
-        loadTransactionsLog();
-        setupForms();
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-VyUd5FUMb0KCUROhQRqoyOL1V7Noguk",
+      authDomain: "akadimiat-jyl-almustaqbal.firebaseapp.com",
+      projectId: "akadimiat-jyl-almustaqbal",
+      storageBucket: "akadimiat-jyl-almustaqbal.appspot.com",
+      messagingSenderId: "495523964077",
+      appId: "1:495523964077:web:c73b443dd98733ab0a9224",
+      measurementId: "G-8HY9WHV1Z1"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    let dbReady = false;
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            if (!dbReady) {
+                initializeAppLogic();
+                dbReady = true;
+            }
+        } else {
+            signInAnonymously(auth).catch((error) => {
+                console.error("Anonymous sign-in failed:", error);
+                showNotificationModal("فشل الاتصال بقاعدة البيانات. الرجاء تحديث الصفحة.");
+            });
+        }
     });
 
-    function loadFinancialSummary() {
-        onSnapshot(collection(db, "transactions"), (snapshot) => {
-            let income = 0, expenses = 0;
-            snapshot.forEach(doc => {
-                const t = doc.data();
-                if (t.type === 'income' || t.type === 'student_payment') income += t.amount;
-                else if (t.type === 'expense') expenses += t.amount;
-            });
-            onSnapshot(collection(db, "schedules"), (scheduleSnapshot) => {
-                let sessionIncome = 0;
-                scheduleSnapshot.forEach(doc => { sessionIncome += doc.data().sessionRevenue || 0; });
-                
-                document.getElementById('summary-income').textContent = `${(income + sessionIncome).toLocaleString()} دج`;
+    function initializeAppLogic() {
+        const transactionsCollection = collection(db, "transactions");
+        const employeesCollection = collection(db, "employees");
+
+        // --- Modal Handling ---
+        const editModal = document.getElementById('edit-expense-modal');
+        const notificationModal = document.getElementById('notification-modal');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        
+        function showNotificationModal(message) {
+            document.getElementById('notification-message').textContent = message;
+            notificationModal.classList.add('visible');
+        }
+        
+        function showConfirmationModal(onConfirm) {
+            confirmationModal.classList.add('visible');
+            const confirmBtn = document.getElementById('confirm-delete-btn');
+            const passwordInput = document.getElementById('password-confirm');
+            const passwordError = document.getElementById('password-error');
+            passwordInput.value = '';
+            passwordError.classList.add('hidden');
+
+            const confirmHandler = () => {
+                if (passwordInput.value === 'S22MARKET') {
+                    onConfirm();
+                    hideConfirmationModal();
+                } else {
+                    passwordError.classList.remove('hidden');
+                }
+            };
+            
+            confirmBtn.onclick = confirmHandler;
+        }
+
+        function hideEditModal() { editModal.classList.remove('visible'); }
+        function hideNotificationModal() { notificationModal.classList.remove('visible'); }
+        function hideConfirmationModal() { confirmationModal.classList.remove('visible'); }
+
+        editModal.querySelector('.cancel-btn').addEventListener('click', hideEditModal);
+        notificationModal.querySelector('.close-notification-btn').addEventListener('click', hideNotificationModal);
+        confirmationModal.querySelector('.cancel-confirm-btn').addEventListener('click', hideConfirmationModal);
+
+        // --- Main Logic ---
+        function showEditModal(transaction) {
+            document.getElementById('edit-expense-id').value = transaction.id;
+            document.getElementById('edit-expense-desc').value = transaction.description;
+            document.getElementById('edit-expense-amount').value = transaction.amount;
+            document.getElementById('edit-expense-category').value = transaction.category || 'مصاريف أخرى';
+            editModal.classList.add('visible');
+        }
+        
+        function loadFinancialSummary() {
+            onSnapshot(transactionsCollection, (snapshot) => {
+                let income = 0, expenses = 0;
+                snapshot.forEach(doc => {
+                    const t = doc.data();
+                    if (['student_payment', 'session_income'].includes(t.type)) income += t.amount;
+                    else if (t.type === 'expense') expenses += t.amount;
+                });
+                document.getElementById('summary-income').textContent = `${income.toLocaleString()} دج`;
                 document.getElementById('summary-expenses').textContent = `${expenses.toLocaleString()} دج`;
-                document.getElementById('summary-profit').textContent = `${(income + sessionIncome - expenses).toLocaleString()} دج`;
+                document.getElementById('summary-profit').textContent = `${(income - expenses).toLocaleString()} دج`;
             });
-        });
-        // You can add debt summary logic here as well
-    }
-
-    function loadTransactionsLog() {
-        const logBody = document.getElementById('transactions-log');
-        const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
-        onSnapshot(q, (snapshot) => {
-            logBody.innerHTML = snapshot.empty ? '<tr><td colspan="4" class="text-center p-4">لا توجد معاملات.</td></tr>' : '';
-            snapshot.forEach(doc => {
-                const t = doc.data();
-                const typeMap = { 'student_payment': 'قبض طالب', 'expense': 'مصروف', 'income': 'دخل آخر' };
-                const typeColor = t.type.includes('payment') || t.type.includes('income') ? 'text-green-600' : 'text-red-600';
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${t.createdAt.toDate().toLocaleDateString('ar-EG')}</td>
-                    <td class="font-semibold ${typeColor}">${typeMap[t.type] || 'غير محدد'}</td>
-                    <td>${t.description}</td>
-                    <td class="font-bold">${t.amount.toLocaleString()} دج</td>
-                `;
-                logBody.appendChild(row);
+        }
+        
+        function loadTeachers() {
+            const teacherSelect = document.getElementById('teacher-select');
+            const q = query(employeesCollection, where("role", "==", "أستاذ"), orderBy("name"));
+            
+            onSnapshot(q, (snapshot) => {
+                teacherSelect.innerHTML = snapshot.empty ? '<option value="">لا يوجد أساتذة مضافون</option>' : '<option value="">-- اختر أستاذ --</option>';
+                snapshot.forEach(doc => {
+                    const teacher = { id: doc.id, ...doc.data() };
+                    const option = document.createElement('option');
+                    option.value = teacher.id;
+                    option.textContent = teacher.name;
+                    teacherSelect.appendChild(option);
+                });
             });
-        });
-    }
+        }
 
-    function setupForms() {
-        // Receipt Form
-        document.getElementById('receipt-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const studentName = document.getElementById('student-name').value;
-            const amount = Number(document.getElementById('payment-amount').value);
-            const forReason = document.getElementById('payment-for').value;
+        function loadTransactionsLog() {
+            const logBody = document.getElementById('transactions-log');
+            const q = query(transactionsCollection, orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                logBody.innerHTML = snapshot.empty ? '<tr><td colspan="5" class="text-center p-4">لا توجد معاملات.</td></tr>' : '';
+                snapshot.forEach(doc => {
+                    const t = { id: doc.id, ...doc.data() };
+                    const typeMap = { 'student_payment': 'قبض طالب', 'expense': 'مصروف', 'session_income': 'دخل حصة' };
+                    const isIncome = ['student_payment', 'session_income'].includes(t.type);
+                    const typeColor = isIncome ? 'text-green-600' : 'text-red-600';
+                    
+                    let actionsHtml = '—';
+                    if (t.type === 'expense' && !t.isFromEmployeeModule) {
+                        actionsHtml = `
+                            <button class="btn-sm btn-warning edit-btn" data-id="${t.id}">تعديل</button>
+                            <button class="btn-sm btn-danger delete-btn" data-type="expense" data-id="${t.id}">حذف</button>
+                        `;
+                    } else if (t.type === 'student_payment') {
+                         actionsHtml = `<button class="btn-sm btn-danger delete-btn" data-type="student_payment" data-id="${t.id}">حذف</button>`;
+                    }
 
-            // 1. Save transaction to database
-            await addDoc(collection(db, "transactions"), {
-                type: 'student_payment',
-                description: `وصل دفع للطالب: ${studentName} - مقابل: ${forReason}`,
-                amount: amount,
-                createdAt: serverTimestamp()
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${t.createdAt?.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }) || '...'}</td>
+                        <td class="font-semibold ${typeColor}">${typeMap[t.type] || 'غير محدد'}</td>
+                        <td>${t.type === 'expense' ? (t.category || '') + ' - ' : ''}${t.description}</td>
+                        <td class="font-bold">${t.amount.toLocaleString()} دج</td>
+                        <td>${actionsHtml}</td>
+                    `;
+                    logBody.appendChild(row);
+
+                    if (t.type === 'expense' && !t.isFromEmployeeModule) {
+                        row.querySelector('.edit-btn')?.addEventListener('click', () => showEditModal(t));
+                    }
+                    
+                    row.querySelector('.delete-btn')?.addEventListener('click', (e) => {
+                        const transactionId = e.target.dataset.id;
+                        showConfirmationModal(async () => {
+                            await deleteDoc(doc(db, "transactions", transactionId));
+                            showNotificationModal('تم الحذف بنجاح.');
+                        });
+                    });
+                });
+            });
+        }
+
+        function setupForms() {
+            document.getElementById('receipt-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const studentName = document.getElementById('student-name').value;
+                const amount = Number(document.getElementById('payment-amount').value);
+                const forReason = document.getElementById('payment-for').value;
+                const method = document.getElementById('payment-method').value;
+
+                try {
+                    await addDoc(transactionsCollection, { type: 'student_payment', description: `وصل دفع للطالب: ${studentName} - مقابل: ${forReason}`, amount, createdAt: serverTimestamp() });
+                    printReceipt({ studentName, amount, forReason, method, date: new Date().toLocaleDateString('ar-EG'), receiptId: `RCPT-${Date.now()}` });
+                    e.target.reset();
+                } catch (error) { console.error("Error creating receipt:", error); showNotificationModal("حدث خطأ أثناء إنشاء الوصل."); }
             });
 
-            // 2. Print receipt
-            printReceipt({
-                studentName,
-                parentName: document.getElementById('parent-name').value,
-                amount,
-                forReason,
-                method: document.getElementById('payment-method').value,
-                date: new Date().toLocaleDateString('ar-EG'),
-                receiptId: `RCPT-${Date.now()}`
+            document.getElementById('expense-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const description = document.getElementById('expense-desc').value;
+                const amount = Number(document.getElementById('expense-amount').value);
+                const category = document.getElementById('expense-category').value;
+                try {
+                    await addDoc(transactionsCollection, { type: 'expense', description, amount, category, createdAt: serverTimestamp() });
+                    e.target.reset();
+                    showNotificationModal('تم تسجيل المصروف بنجاح');
+                } catch (error) { console.error("Error adding expense:", error); showNotificationModal('حدث خطأ أثناء تسجيل المصروف.'); }
             });
-            e.target.reset();
-        });
+            
+            document.getElementById('session-income-form').addEventListener('submit', async (e) => {
+                 e.preventDefault();
+                 const teacherSelect = document.getElementById('teacher-select');
+                 const teacherId = teacherSelect.value;
+                 const teacherName = teacherSelect.options[teacherSelect.selectedIndex].text;
+                 const studentCount = Number(document.getElementById('student-count').value);
+                 const chairPrice = Number(document.getElementById('chair-price').value);
+                 const totalIncome = studentCount * chairPrice;
 
-        // Expense Form
-        document.getElementById('expense-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const description = document.getElementById('expense-desc').value;
-            const amount = Number(document.getElementById('expense-amount').value);
-            await addDoc(collection(db, "transactions"), {
-                type: 'expense',
-                description,
-                amount,
-                createdAt: serverTimestamp()
+                 if (!teacherId || studentCount <= 0 || chairPrice <= 0) { showNotificationModal('يرجى ملء جميع الحقول بشكل صحيح.'); return; }
+                 try {
+                    await addDoc(transactionsCollection, {
+                        type: 'session_income',
+                        description: `دخل حصة الأستاذ ${teacherName} (${studentCount} طالب × ${chairPrice} دج)`,
+                        amount: totalIncome,
+                        details: { teacherId, teacherName, studentCount, chairPrice },
+                        createdAt: serverTimestamp()
+                    });
+                    e.target.reset();
+                    document.getElementById('chair-price').value = '100';
+                    showNotificationModal(`تم تسجيل دخل بقيمة ${totalIncome.toLocaleString()} دج بنجاح.`);
+                 } catch (error) { console.error("Error adding session income:", error); showNotificationModal('حدث خطأ أثناء تسجيل الدخل.'); }
             });
-            e.target.reset();
-            alert('تم تسجيل المصروف بنجاح');
-        });
-    }
 
-    function printReceipt(data) {
-        const printContainer = document.getElementById('receipt-to-print');
-        printContainer.innerHTML = `
-            <div style="border: 2px solid #333; padding: 25px; max-width: 800px; margin: auto; background: #fff;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px;">
-                    <div>
-                        <h1 style="font-size: 24px; margin: 0; color: #2563eb;">أكاديمية جيل المستقبل</h1>
-                        <p style="margin: 0;">بيئة تعليمية مبتكرة</p>
+            document.getElementById('edit-expense-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('edit-expense-id').value;
+                const description = document.getElementById('edit-expense-desc').value;
+                const amount = Number(document.getElementById('edit-expense-amount').value);
+                const category = document.getElementById('edit-expense-category').value;
+                
+                const docRef = doc(db, "transactions", id);
+                await updateDoc(docRef, { description, amount, category });
+                
+                showNotificationModal('تم تحديث المصروف بنجاح.');
+                hideEditModal();
+            });
+        }
+
+        function printReceipt(data) {
+            const receiptHTML = `
+                <div style="border: 2px solid #333; padding: 25px; max-width: 800px; margin: 20px auto; background: #fff; direction: rtl; font-family: 'Tajawal', sans-serif;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px;">
+                        <div><h1 style="font-size: 24px; margin: 0; color: #2563eb;">أكاديمية جيل المستقبل</h1><p style="margin: 0; font-size: 14px;">بيئة تعليمية مبتكرة</p></div>
+                        <h2 style="font-size: 28px; margin: 0;">وصل قبض</h2>
                     </div>
-                    <h2 style="font-size: 28px; margin: 0;">وصل قبض</h2>
-                </div>
-                <div style="padding: 20px 0; font-size: 14px;">
-                    <p><strong>رقم الوصل:</strong> ${data.receiptId}</p>
-                    <p><strong>التاريخ:</strong> ${data.date}</p>
-                    <p><strong>استلمنا من السيد/السيدة:</strong> ${data.parentName || 'ولي أمر الطالب/ة'}</p>
-                    <p><strong>اسم الطالب/ة:</strong> ${data.studentName}</p>
-                </div>
-                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                    <thead><tr style="background-color: #f0f2f5;">
-                        <th style="border: 1px solid #ccc; padding: 10px;">البيان</th>
-                        <th style="border: 1px solid #ccc; padding: 10px;">المبلغ</th>
-                    </tr></thead>
-                    <tbody><tr>
-                        <td style="border: 1px solid #ccc; padding: 10px;">${data.forReason}</td>
-                        <td style="border: 1px solid #ccc; padding: 10px; font-weight: bold;">${data.amount.toLocaleString()} دج</td>
-                    </tr></tbody>
-                </table>
-                 <div style="margin-top: 20px; text-align: left; font-size: 16px;">
-                     <p><strong>طريقة الدفع:</strong> ${data.method}</p>
-                    <p style="font-weight: bold; font-size: 18px;">الإجمالي: ${data.amount.toLocaleString()} دج</p>
-                </div>
-                <div style="margin-top: 50px; text-align: center; border-top: 1px dashed #999; padding-top: 15px;">
-                    <p><strong>ختم وتوقيع الإدارة</strong></p>
-                </div>
-            </div>
-        `;
-        window.print();
-    }
+                    <div style="padding: 20px 0; font-size: 14px;"><p><strong>رقم الوصل:</strong> ${data.receiptId}</p><p><strong>التاريخ:</strong> ${data.date}</p><p><strong>اسم الطالب/ة:</strong> ${data.studentName}</p></div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead><tr style="background-color: #f0f2f5;"><th style="border: 1px solid #ccc; padding: 10px; text-align: right;">البيان</th><th style="border: 1px solid #ccc; padding: 10px; text-align: right;">المبلغ</th></tr></thead>
+                        <tbody><tr><td style="border: 1px solid #ccc; padding: 10px;">${data.forReason}</td><td style="border: 1px solid #ccc; padding: 10px; font-weight: bold;">${data.amount.toLocaleString()} دج</td></tr></tbody>
+                    </table>
+                     <div style="margin-top: 20px; text-align: left; font-size: 16px;"><p><strong>طريقة الدفع:</strong> ${data.method}</p><p style="font-weight: bold; font-size: 18px;">الإجمالي: ${data.amount.toLocaleString()} دج</p></div>
+                    <div style="margin-top: 50px; text-align: center; border-top: 1px dashed #999; padding-top: 15px;"><p><strong>ختم وتوقيع الإدارة</strong></p></div>
+                </div>`;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>طباعة وصل</title><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet"></head><body dir="rtl">');
+            printWindow.document.write(receiptHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+        }
 
+        loadFinancialSummary();
+        loadTransactionsLog();
+        loadTeachers();
+        setupForms();
+    }
 </script>
 </body>
 </html>
