@@ -142,11 +142,15 @@
                     </div>
                     <div>
                         <h3 class="text-xl font-bold mb-4">تواصل معنا</h3>
-                        <ul class="space-y-2 text-slate-400" aria-label="contact-info">
-                           <li><i class="fas fa-phone-alt ml-2"></i><span data-id="phone">(سيتم جلبه من الإعدادات)</span></li>
-                           <li><i class="fab fa-whatsapp ml-2"></i><span data-id="whatsapp">(سيتم جلبه من الإعدادات)</span></li>
-                           <li><i class="fab fa-facebook-f ml-2"></i><span data-id="facebook">(سيتم جلبه من الإعدادات)</span></li>
-                        </ul>
+                 
+                        
+                        <ul id="social-links-container" class="space-y-2 text-slate-400" aria-label="contact-info">
+    <li class="h-5 w-32 bg-slate-700 rounded animate-pulse"></li>
+    <li class="h-5 w-40 bg-slate-700 rounded animate-pulse"></li>
+    <li class="h-5 w-36 bg-slate-700 rounded animate-pulse"></li>
+</ul>
+
+
                     </div>
                 </div>
                 <div class="border-t border-slate-700 mt-8 pt-6 text-center text-slate-500">
@@ -251,13 +255,75 @@
         }
         
         // Load Footer Contact Info
+  
+      
+        
+
+
+
+
+
+
+
+
+        // Load Footer Contact Info
         async function loadFooterContactInfo() {
-            const docSnap = await getDoc(doc(db, "settings", "general"));
-            if (docSnap.exists()) {
-                const links = docSnap.data().socialLinks || {};
-                 if(links.phone1) document.querySelector('footer span[data-id="phone"]').textContent = links.phone1;
-                 if(links.whatsapp1) document.querySelector('footer span[data-id="whatsapp"]').textContent = links.whatsapp1;
-                 if(links.facebook1) document.querySelector('footer span[data-id="facebook"]').textContent = 'صفحتنا على فيسبوك';
+            const container = document.getElementById('social-links-container');
+            try {
+                const docSnap = await getDoc(doc(db, "settings", "general"));
+                if (docSnap.exists() && docSnap.data().socialLinks) {
+                    const links = docSnap.data().socialLinks;
+                    let html = '';
+
+                // إضافة رابط الموقع الجغرافي إن وجد
+if (links.mapUrl) {
+    html += `<li>
+        <a href="${links.mapUrl}" target="_blank" class="inline-flex items-center gap-2 hover:text-white transition">
+            <i class="fas fa-map-marker-alt fa-fw"></i>
+            <span>عرض الموقع على الخريطة</span>
+        </a>
+    </li>`;
+}
+
+                    
+
+
+
+                    // إضافة رابط الهاتف إن وجد
+                    if (links.phoneNumber) {
+                        html += `<li><a href="tel:${links.phoneNumber}" class="inline-flex items-center gap-2 hover:text-white transition"><i class="fas fa-phone-alt fa-fw"></i><span>${links.phoneNumber}</span></a></li>`;
+                    }
+                    // إضافة رابط واتساب إن وجد
+                    if (links.whatsappNumber) {
+                        const whatsappUrl = `https://wa.me/${links.whatsappNumber.replace(/[^0-9]/g, '')}`;
+                        html += `<li><a href="${whatsappUrl}" target="_blank" class="inline-flex items-center gap-2 hover:text-white transition"><i class="fab fa-whatsapp fa-fw"></i><span>${links.whatsappNumber}</span></a></li>`;
+                    }
+                    // إضافة رابط فيسبوك إن وجد
+                    if (links.facebookUrl) {
+                        html += `<li><a href="${links.facebookUrl}" target="_blank" class="inline-flex items-center gap-2 hover:text-white transition"><i class="fab fa-facebook-f fa-fw"></i><span>صفحتنا على فيسبوك</span></a></li>`;
+                    }
+                    // إضافة رابط انستغرام إن وجد
+                    if (links.instagramUrl) {
+                        html += `<li><a href="${links.instagramUrl}" target="_blank" class="inline-flex items-center gap-2 hover:text-white transition"><i class="fab fa-instagram fa-fw"></i><span>حسابنا على انستغرام</span></a></li>`;
+                    }
+                    // إضافة رابط تيليجرام إن وجد
+                    if (links.telegramUrl) {
+                        html += `<li><a href="${links.telegramUrl}" target="_blank" class="inline-flex items-center gap-2 hover:text-white transition"><i class="fab fa-telegram fa-fw"></i><span>قناتنا على تيليجرام</span></a></li>`;
+                    }
+                    // إضافة رابط تيك توك إن وجد
+                    if (links.tiktokUrl) {
+                        html += `<li><a href="${links.tiktokUrl}" target="_blank" class="inline-flex items-center gap-2 hover:text-white transition"><i class="fab fa-tiktok fa-fw"></i><span>حسابنا على تيك توك</span></a></li>`;
+                    }
+
+                    // عرض المحتوى أو رسالة بديلة
+                    container.innerHTML = html || '<li class="text-slate-500">لم تتم إضافة معلومات التواصل بعد.</li>';
+
+                } else {
+                    container.innerHTML = '<li class="text-slate-500">لم تتم إضافة معلومات التواصل بعد.</li>';
+                }
+            } catch (error) {
+                console.error("Error loading contact info:", error);
+                container.innerHTML = '<li class="text-red-400">حدث خطأ أثناء تحميل معلومات التواصل.</li>';
             }
         }
     </script>

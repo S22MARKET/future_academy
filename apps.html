@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحميل تطبيقات أكاديمية المستقبل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* -------------------
+         * Global Styles & Variables
+         * ------------------- */
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #50e3c2;
+            --dark-blue: #2c3e50;
+            --light-gray: #f7f9fc;
+            --text-color: #34495e;
+            --white: #ffffff;
+            --danger-color: #e74c3c;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --modal-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* -------------------
+         * Main Structure
+         * ------------------- */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+        /* -------------------
+         * Header
+         * ------------------- */
+        .header {
+            text-align: center;
+            padding: 50px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+        .header .logo { width: 90px; height: 90px; border-radius: 50%; margin-bottom: 15px; background-color: var(--white); padding: 10px; }
+        .header h1 { font-size: 2.8rem; font-weight: 700; margin-bottom: 5px; }
+        .header p { font-size: 1.2rem; opacity: 0.9; }
+
+        /* -------------------
+         * App Cards
+         * ------------------- */
+        .apps-container { display: flex; flex-direction: column; gap: 30px; }
+        .app-card {
+            background-color: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .app-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12); }
+        .app-card .app-details { padding: 30px; text-align: center; }
+        .app-card .app-icon { width: 80px; height: 80px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; }
+        .app-card .app-icon svg { width: 100%; height: 100%; }
+        .app-card h2 { font-size: 1.7rem; font-weight: 700; color: var(--dark-blue); margin-bottom: 10px; }
+        .app-card p { font-size: 1rem; margin-bottom: 25px; color: #7f8c8d; }
+        
+        /* -------------------
+         * Download Button
+         * ------------------- */
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .download-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(74, 144, 226, 0.5); }
+        
+        /* -------------------
+         * Password Modal (Popup)
+         * ------------------- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            background-color: var(--white);
+            margin: 15% auto;
+            padding: 30px 35px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            box-shadow: var(--modal-shadow);
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal h2 { font-size: 1.6rem; color: var(--dark-blue); margin-bottom: 10px; }
+        .modal p { color: #7f8c8d; margin-bottom: 20px; }
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+        .modal-input:focus { border-color: var(--primary-color); outline: none; }
+        .modal-submit-btn { width: 100%; }
+        .error-message { color: var(--danger-color); margin-top: 15px; font-weight: 500; display: none; }
+        .close-btn {
+            position: absolute;
+            left: 20px;
+            top: 15px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close-btn:hover { color: var(--dark-blue); }
+
+        /* -------------------
+         * Footer & Responsive Design
+         * ------------------- */
+        footer { text-align: center; padding: 30px 20px; margin-top: 40px; color: #95a5a6; }
+        @media (min-width: 768px) {
+            .app-card { flex-direction: row; align-items: center; text-align: right; }
+            .app-card .app-icon { flex: 0 0 100px; margin: 0 0 0 30px; }
+            .app-card .app-details { text-align: right; padding-right: 0; }
+            .header h1 { font-size: 3.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <img src="https://via.placeholder.com/100" alt="شعار أكاديمية المستقبل" class="logo">
+        <h1>أكاديمية المستقبل</h1>
+        <p>بوابتك الذكية للتعلم الرقمي</p>
+    </header>
+
+    <main class="container">
+        <div class="apps-container">
+            <section class="app-card">
+                 <div class="app-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 21H7C4.79086 21 3 19.2091 3 17V7C3 4.79086 4.79086 3 7 3H17C19.2091 3 21 4.79086 21 7V17C21 19.2091 19.2091 21 17 21Z" stroke="#4a90e2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#4a90e2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.00002 6H8.01002" stroke="#50e3c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="app-details">
+                    <h2>تطبيق الطالب</h2>
+                    <p>تابع دروسك، تفاعل مع معلميك، وأنجز واجباتك بكل سهولة. النسخة التجريبية (Beta) بين يديك الآن!</p>
+                    <a href="Future academy beta.apk" class="download-btn" download>تحميل التطبيق (APK)</a>
+                </div>
+            </section>
+
+            <section class="app-card">
+                <div class="app-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h16M4 18h7" stroke="#4a90e2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 18h5v-6h-5v6z" stroke="#50e3c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="app-details">
+                    <h2>لوحة التحكم</h2>
+                    <p>للمعلمين والإدارة، أداة متكاملة لإدارة المحتوى التعليمي ومتابعة تقدم الطلاب بكفاءة وفعالية.</p>
+                    <button id="dashboardDownloadBtn" class="download-btn">تحميل التطبيق (APK)</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 أكاديمية المستقبل. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>كلمة المرور مطلوبة</h2>
+            <p>لتحميل تطبيق الإدارة، يرجى إدخال كلمة المرور.</p>
+            <input type="password" id="passwordInput" class="modal-input" placeholder="S22MARKET" autocomplete="current-password">
+            <button id="submitPassword" class="download-btn modal-submit-btn">تأكيد ومتابعة</button>
+            <p id="errorMessage" class="error-message">كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- عناصر النافذة المنبثقة ---
+        const modal = document.getElementById('passwordModal');
+        const modalContent = document.querySelector('.modal-content');
+        const openModalBtn = document.getElementById('dashboardDownloadBtn');
+        const closeModalBtn = document.querySelector('.close-btn');
+        const submitPasswordBtn = document.getElementById('submitPassword');
+        const passwordInput = document.getElementById('passwordInput');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // --- وظيفة إظهار النافذة ---
+        openModalBtn.onclick = function() {
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                modalContent.style.transform = 'scale(1)';
+            }, 10);
+        };
+
+        // --- وظيفة إخفاء النافذة ---
+        function closeModal() {
+            modal.style.opacity = '0';
+            modalContent.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                // إعادة تعيين الحقول عند الإغلاق
+                passwordInput.value = '';
+                errorMessage.style.display = 'none';
+            }, 300);
+        }
+
+        closeModalBtn.onclick = closeModal;
+        // إغلاق النافذة عند الضغط خارجها
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        };
+
+        // --- وظيفة التحقق من كلمة المرور والتحميل ---
+        function handlePasswordSubmit() {
+            const correctPassword = 'S22MARKET';
+            const enteredPassword = passwordInput.value;
+
+            if (enteredPassword === correctPassword) {
+                errorMessage.style.display = 'none';
+                
+                // إنشاء رابط تحميل وهمي والضغط عليه لتنزيل الملف
+                const link = document.createElement('a');
+                link.href = 'Future academy dashboard.apk';
+                link.download = 'Future academy dashboard.apk';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                closeModal(); // إغلاق النافذة بعد التحميل
+            } else {
+                errorMessage.style.display = 'block';
+            }
+        }
+        
+        submitPasswordBtn.onclick = handlePasswordSubmit;
+        
+        // السماح بالضغط على زر "Enter" للتأكيد
+        passwordInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                handlePasswordSubmit();
+            }
+        });
+
+    </script>
+</body>
+</html>

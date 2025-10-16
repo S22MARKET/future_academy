@@ -28,7 +28,9 @@
 <body>
 
 <div class="relative min-h-screen md:flex">
-    <aside class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 right-0 transform md:relative md:translate-x-0 z-30">
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
+    
+    <aside id="sidebar" class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 right-0 transform translate-x-full md:relative md:translate-x-0 transition duration-300 ease-in-out z-30">
         <div class="p-3 text-center border-b border-gray-700">
             <h2 class="text-2xl font-bold">جيل المستقبل</h2>
         </div>
@@ -42,73 +44,78 @@
         </div>
     </aside>
 
-    <main class="flex-1 p-4 md:p-8 overflow-y-auto">
-        <h1 class="text-3xl font-bold mb-6">إدارة شؤون الموظفين</h1>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1 space-y-8">
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <button id="add-employee-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg text-lg flex items-center justify-center gap-2">
-                        <i class="fas fa-plus"></i> إضافة موظف جديد
-                    </button>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-xl font-bold mb-4">قائمة الموظفين</h2>
-                    <div id="employees-list" class="space-y-2 max-h-96 overflow-y-auto">
-                        <p class="text-gray-500">جاري تحميل القائمة...</p>
-                    </div>
-                </div>
-            </div>
+    <div class="flex-1 flex flex-col">
+        <header class="md:hidden bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-10">
+            <h1 class="text-xl font-bold text-gray-800">إدارة شؤون الموظفين</h1>
+            <button id="menu-toggle-btn" class="text-2xl text-gray-600"><i class="fas fa-bars"></i></button>
+        </header>
 
-            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
-                <div id="employee-selection-view">
-                    <div class="mt-8">
-                        <div id="employee-ledger-title" class="text-lg font-semibold mb-2 text-center p-8 text-gray-500 bg-gray-50 rounded-lg">
-                            <i class="fas fa-user-check fa-2x mb-2"></i>
-                            <p>الرجاء اختيار موظف من القائمة اليمنى لعرض كشف حسابه وتسجيل المعاملات.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="employee-details-view" class="hidden">
-                    <h2 class="text-xl font-bold mb-4 border-b pb-2" id="employee-view-name"></h2>
-                    <form id="employee-transaction-form-active" class="space-y-4">
-                         <input type="hidden" id="selected-employee-id">
-                         <input type="hidden" id="selected-employee-name">
-                        <div class="form-group">
-                            <label for="transaction-type" class="font-semibold">نوع المعاملة</label>
-                            <select id="transaction-type" class="w-full p-2 border rounded mt-1">
-                                <option value="راتب">راتب (يخصم من الأكاديمية)</option>
-                                <option value="سلفة">سلفة (دين على الموظف)</option>
-                                <option value="مكافأة">مكافأة (تخصم من الأكاديمية)</option>
-                                <option value="خصم">خصم (يضاف للأكاديمية)</option>
-                            </select>
-                        </div>
-                        <input type="number" id="transaction-amount" placeholder="المبلغ (دج)" required class="w-full p-2 border rounded">
-                        <input type="text" id="transaction-notes" placeholder="ملاحظات (اختياري)" class="w-full p-2 border rounded">
-                        <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
-                            <i class="fas fa-check"></i> تسجيل المعاملة
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6 hidden md:block">إدارة شؤون الموظفين</h1>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 space-y-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <button id="add-employee-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg text-lg flex items-center justify-center gap-2">
+                            <i class="fas fa-plus"></i> إضافة موظف جديد
                         </button>
-                    </form>
-                    <div class="mt-8">
-                        <h2 class="text-xl font-bold mb-4">كشف الحساب</h2>
-                        <div class="table-wrapper">
-                            <table>
-                                <thead><tr><th>التاريخ</th><th>البيان</th><th>له (مستحقات)</th><th>عليه (ديون)</th><th>إجراءات</th></tr></thead>
-                                <tbody id="employee-ledger-body"></tbody>
-                                <tfoot>
-                                    <tr class="bg-gray-200 font-bold text-lg">
-                                        <td colspan="3">الرصيد النهائي</td>
-                                        <td colspan="2" id="employee-final-balance" class="text-center">0.00 دج</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4">قائمة الموظفين</h2>
+                        <div id="employees-list" class="space-y-2 max-h-96 overflow-y-auto">
+                            <p class="text-gray-500">جاري تحميل القائمة...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                    <div id="employee-selection-view">
+                        <div class="flex flex-col items-center justify-center h-full text-center p-8 text-gray-500 bg-gray-50 rounded-lg">
+                            <i class="fas fa-user-check fa-3x mb-4"></i>
+                            <p class="text-lg">الرجاء اختيار موظف من القائمة لعرض كشف حسابه وتسجيل المعاملات.</p>
+                        </div>
+                    </div>
+
+                    <div id="employee-details-view" class="hidden">
+                        <h2 class="text-xl font-bold mb-4 border-b pb-2" id="employee-view-name"></h2>
+                        <form id="employee-transaction-form-active" class="space-y-4">
+                            <input type="hidden" id="selected-employee-id">
+                            <input type="hidden" id="selected-employee-name">
+                            <div class="form-group">
+                                <label for="transaction-type" class="font-semibold">نوع المعاملة</label>
+                                <select id="transaction-type" class="w-full p-2 border rounded mt-1">
+                                    <option value="راتب">راتب (يخصم من الأكاديمية)</option>
+                                    <option value="سلفة">سلفة (دين على الموظف)</option>
+                                    <option value="مكافأة">مكافأة (تخصم من الأكاديمية)</option>
+                                    <option value="خصم">خصم (يضاف للأكاديمية)</option>
+                                </select>
+                            </div>
+                            <input type="number" id="transaction-amount" placeholder="المبلغ (دج)" required class="w-full p-2 border rounded">
+                            <input type="text" id="transaction-notes" placeholder="ملاحظات (اختياري)" class="w-full p-2 border rounded">
+                            <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> تسجيل المعاملة
+                            </button>
+                        </form>
+                        <div class="mt-8">
+                            <h2 class="text-xl font-bold mb-4">كشف الحساب</h2>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead><tr><th>التاريخ</th><th>البيان</th><th>له (مستحقات)</th><th>عليه (ديون)</th><th>إجراءات</th></tr></thead>
+                                    <tbody id="employee-ledger-body"></tbody>
+                                    <tfoot>
+                                        <tr class="bg-gray-200 font-bold text-lg">
+                                            <td colspan="3">الرصيد النهائي</td>
+                                            <td colspan="2" id="employee-final-balance" class="text-center">0.00 دج</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 </div>
 
 <div id="employee-modal" class="modal-overlay">
@@ -127,10 +134,10 @@
                     <div class="flex items-center"><input type="checkbox" id="role-deputy" name="role" value="نائب المديرة" class="ml-2"><label for="role-deputy">نائب المديرة</label></div>
                     <div class="flex items-center"><input type="checkbox" id="role-cleaner" name="role" value="مهندس نظافة" class="ml-2"><label for="role-cleaner">مهندس نظافة</label></div>
                     <div class="flex items-center"><input type="checkbox" id="role-admin" name="role" value="إداري" class="ml-2"><label for="role-admin">إداري</label></div>
-                    <div class="flex items-center">
+                    <div class="flex flex-wrap items-center">
                         <input type="checkbox" id="role-other-checkbox" name="role" value="أخرى" class="ml-2">
                         <label for="role-other-checkbox" class="whitespace-nowrap">موظف آخر (يرجى التحديد):</label>
-                        <input type="text" id="role-other-text" placeholder="اكتب الوظيفة هنا" class="w-full p-1 border rounded mr-2" disabled>
+                        <input type="text" id="role-other-text" placeholder="اكتب الوظيفة هنا" class="flex-grow p-1 border rounded mr-2 mt-1 sm:mt-0" disabled>
                     </div>
                 </div>
             </div>
@@ -202,6 +209,18 @@
     let currentLedgerUnsubscribe = null;
     const standardRoles = ["أستاذ", "نائب المديرة", "مهندس نظافة", "إداري"];
 
+    // --- Mobile Menu ---
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobile-overlay');
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const toggleMenu = () => {
+        sidebar.classList.toggle('translate-x-full');
+        overlay.classList.toggle('hidden');
+    };
+    menuToggleBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             if (!dbReady) {
@@ -272,7 +291,6 @@
                 document.getElementById('employee-facebook').value = employee.facebook || '';
                 document.getElementById('employee-notes').value = employee.notes || '';
                 
-                // Set roles
                 const employeeRoles = Array.isArray(employee.role) ? employee.role : [employee.role];
                 form.querySelectorAll('input[name="role"]').forEach(checkbox => {
                     checkbox.checked = employeeRoles.includes(checkbox.value);
@@ -298,7 +316,6 @@
         const hideEmployeeModal = () => employeeModal.classList.remove('visible');
         employeeModal.querySelector('.cancel-employee-modal-btn').addEventListener('click', hideEmployeeModal);
         
-        // --- Event Listeners for Roles ---
         document.getElementById('roles-container').addEventListener('change', (e) => {
             if (e.target.name === 'role') {
                 const isTeacher = document.getElementById('role-teacher').checked;
@@ -316,7 +333,6 @@
             e.preventDefault();
             const id = document.getElementById('employee-id').value;
             
-            // Collect roles
             let selectedRoles = [];
             document.querySelectorAll('input[name="role"]:checked').forEach(checkbox => {
                 if(checkbox.value !== 'أخرى') {
@@ -382,8 +398,8 @@
                             <span class="text-sm text-gray-500">${roleText}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                             <button class="edit-employee-btn text-blue-500 hover:text-blue-700" title="تعديل البيانات"><i class="fas fa-edit"></i></button>
-                             <button class="delete-employee-btn text-red-500 hover:text-red-700" title="حذف الموظف"><i class="fas fa-user-slash"></i></button>
+                             <button class="edit-employee-btn text-blue-500 hover:text-blue-700 p-1" title="تعديل البيانات"><i class="fas fa-edit"></i></button>
+                             <button class="delete-employee-btn text-red-500 hover:text-red-700 p-1" title="حذف الموظف"><i class="fas fa-user-slash"></i></button>
                         </div>
                     `;
                     listContainer.appendChild(div);
